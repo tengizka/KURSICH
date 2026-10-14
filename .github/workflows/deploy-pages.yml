@@ -52,6 +52,14 @@ jobs:
         with:
           path: dist
 
+      # Страховка: пока в Settings → Pages источником стоит ветка (legacy),
+      # GitHub параллельно собирает сырой репозиторий и может затереть сайт.
+      # Ждём, пока та сборка закончится, и публикуем готовой версией поверх.
+      # После переключения источника на "GitHub Actions" ожидание просто
+      # добавит минуту к деплою, но ничему не мешает.
+      - name: ⏳ Wait for possible legacy Pages build
+        run: sleep 60
+
       - name: 🌍 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
