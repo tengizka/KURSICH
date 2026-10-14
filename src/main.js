@@ -5,7 +5,19 @@ import { UNIT_ART, CAT_ART } from './illustrations.js';
 
 // ── Telegram ───────────────────────────────
 const tg = window.Telegram?.WebApp;
-try { tg?.ready(); tg?.expand(); tg?.setHeaderColor?.('#ffffff'); tg?.setBackgroundColor?.('#ffffff'); } catch (e) {}
+// Статичное приложение: фиксируем экран, запрещаем сворачивание свайпом.
+try {
+  tg?.ready();
+  tg?.expand();
+  tg?.setHeaderColor?.('#ffffff'); tg?.setBackgroundColor?.('#ffffff');
+  // Не сворачиваться при свайпе вниз (Bot API 7.7+)
+  if (typeof tg?.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
+  // Случайное закрытие — только с подтверждением
+  if (typeof tg?.enableClosingConfirmation === 'function') tg.enableClosingConfirmation();
+  // Держать приложение развёрнутым
+  tg?.onEvent?.('viewportChanged', (e) => { if (e?.isStateStable) { try { tg.expand(); } catch (err) {} } });
+} catch (e) {}
+try { tg?.requestFullscreen?.(); } catch (e) { /* старые версии Telegram — просто развёрнуто */ }
 const tgUser = tg?.initDataUnsafe?.user || null;
 const tgName = tgUser?.first_name || '';
 const tgPhoto = tgUser?.photo_url || '';
@@ -314,15 +326,15 @@ function settingsHtml() {
 }
 
 function bindApp() {
-  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); window.scrollTo(0, 0); });
+  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); app.scrollTo(0, 0); });
   const openFinCat = document.getElementById('open-fin-cat');
-  if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); window.scrollTo(0, 0); };
+  if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); app.scrollTo(0, 0); };
   app.querySelectorAll('[data-locked-cat]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_CATS.find((x) => x.id === b.dataset.lockedCat); if (c) showLockedCatModal(c); });
   const openFin = document.getElementById('open-fin');
   if (openFin) openFin.onclick = () => { inPath = true; scrollCurrent = true; haptic('medium'); renderApp(); };
   app.querySelectorAll('[data-locked]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_COURSES.find((x) => x.id === b.dataset.locked); if (c) showLockedModal(c); });
   const backs = app.querySelectorAll('#back-catalog');
-  backs.forEach((back) => back.onclick = () => { if (inPath) { inPath = false; } else { catView = 'catalog'; } haptic(); renderApp(); window.scrollTo(0, 0); });
+  backs.forEach((back) => back.onclick = () => { if (inPath) { inPath = false; } else { catView = 'catalog'; } haptic(); renderApp(); app.scrollTo(0, 0); });
   if (inPath && scrollCurrent) {
     scrollCurrent = false;
     requestAnimationFrame(() => setTimeout(() => {
@@ -331,9 +343,9 @@ function bindApp() {
     }, 60));
   }
   app.querySelectorAll('[data-lesson]').forEach((b) => b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); });
-  const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); window.scrollTo(0, 0); };
-  const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); window.scrollTo(0, 0); };
-  app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); window.scrollTo(0, 0); });
+  const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); app.scrollTo(0, 0); };
+  const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); app.scrollTo(0, 0); };
+  app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); app.scrollTo(0, 0); });
   const nameIn = document.getElementById('set-name');
   if (nameIn) nameIn.addEventListener('change', () => { state.name = nameIn.value.trim(); save(); toast('Имя сохранено'); });
   const darkIn = document.getElementById('set-dark');
@@ -341,7 +353,7 @@ function bindApp() {
   const soundIn = document.getElementById('set-sound');
   if (soundIn) soundIn.addEventListener('change', () => { state.sound = soundIn.checked; save(); if (state.sound) beep(true); });
   const redo = document.getElementById('redo-ob');
-  if (redo) redo.onclick = () => { state.onboarded = false; save(); flow = 'splash'; render(); window.scrollTo(0, 0); };
+  if (redo) redo.onclick = () => { state.onboarded = false; save(); flow = 'splash'; render(); app.scrollTo(0, 0); };
   const reset = document.getElementById('reset-all');
   if (reset) reset.onclick = () => {
     if (confirm('Сбросить прогресс, XP и достижения?')) {
@@ -434,7 +446,7 @@ function advance() {
   L.idx++;
   if (L.idx >= L.steps.length) return finishLesson();
   L.selected = null; L.checked = false;
-  renderLesson(); window.scrollTo(0, 0);
+  renderLesson(); app.scrollTo(0, 0);
 }
 function finishLesson() {
   app.classList.add('in-lesson');
