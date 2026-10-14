@@ -327,3 +327,5 @@ body.dark .dots i{background:#33413a}
 #app.in-lesson .lesson-head{background:#fff}
 body.dark #app.in-lesson{background:#121613;background-image:none}
 body.dark #app.in-lesson .lesson-head{background:#121613}
+.recap-item p{margin:3px 0 0;font-size:13.5px;font-weight:700;color:var(--muted);line-height:1.4}
+.recap-item b{font-size:15px}

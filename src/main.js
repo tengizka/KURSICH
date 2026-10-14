@@ -390,8 +390,7 @@ function renderLesson() {
   } else { // recap
     body = `<span class="phase-tag recap">🧠 Закрепим</span>
       <h2 style="margin-top:14px">Главное из урока</h2>
-      ${L.lesson.cards.map((c, i) => `<div class="recap-item"><span class="rn">${i + 1}</span><span>${c.t}</span></div>`).join('')}
-      <p style="font-weight:800;color:var(--muted);font-size:14px">Верных ответов: ${L.correct} из ${L.totalQ}</p>
+      ${L.lesson.cards.map((c, i) => { const short = (c.b.split(/(?<=\.)\s/)[0] || c.b); return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${c.t}</b><p>${short}</p></div></div>`; }).join('')}
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
   }
   app.innerHTML = `<div style="max-width:480px;margin:0 auto">
