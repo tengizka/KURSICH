@@ -22,7 +22,7 @@ const FACES = {
   celebrate: {
     eyes: CLOSED_HAPPY,
     mouth: `<ellipse cx="110" cy="132" rx="10" ry="11" fill="#7c2d12"/><ellipse cx="110" cy="137" rx="6.5" ry="4.6" fill="#fb7185"/>`,
-    extra: `<text x="30" y="40" font-size="17" class="m-star">⭐</text><text x="182" y="70" font-size="12" class="m-star2">✨</text>`,
+    extra: `<path class="m-star" d="M32 28 L34.8 35.2 L42 38 L34.8 40.8 L32 48 L29.2 40.8 L22 38 L29.2 35.2 Z" fill="#ffc800"/><path class="m-star2" d="M184 61 L185.96 66.04 L191 68 L185.96 69.96 L184 75 L182.04 69.96 L177 68 L182.04 66.04 Z" fill="#1cb0f6"/>`,
   },
   sad: {
     eyes: OPEN_EYES,
@@ -42,7 +42,7 @@ const FACES = {
   proud: {
     eyes: `<g><rect x="69" y="95" width="34" height="18" rx="9" fill="#221d18"/><rect x="117" y="95" width="34" height="18" rx="9" fill="#221d18"/><rect x="73" y="98" width="11" height="4.6" rx="2.3" fill="#fff" opacity=".35"/><rect x="121" y="98" width="11" height="4.6" rx="2.3" fill="#fff" opacity=".35"/></g>`,
     mouth: `<path d="M98 127 Q110 137 123 126" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
-    extra: `<text x="168" y="44" font-size="18" class="m-star">🏆</text>`,
+    extra: '',
   },
   sleepy: {
     eyes: `<path d="M77 104 Q86 110 95 104" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M125 104 Q134 110 143 104" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
@@ -55,7 +55,7 @@ const FACES = {
     extra: '',
   },
   love: {
-    eyes: `<text x="86" y="112" text-anchor="middle" font-size="16">❤️</text><text x="134" y="112" text-anchor="middle" font-size="16">❤️</text>`,
+    eyes: `<path d="M86 112s-9-5.6-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.4-9 11-9 11z" fill="#ff4b6e"/><path d="M134 112s-9-5.6-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.4-9 11-9 11z" fill="#ff4b6e"/>`,
     mouth: `<path d="M96 124 Q110 140 124 124 Q110 129 96 124Z" fill="#7c2d12"/>`,
     extra: '',
   },
