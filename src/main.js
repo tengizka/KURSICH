@@ -240,10 +240,9 @@ const UNIT_DECOR = { u1: ['🧾', '💸'], u2: ['💳', '🧮'], u3: ['📄', '�
 function pathHtml() {
   let gi = -1;
   const units = COURSE.units.map((u) => {
-    const pts = u.lessons.map((l, li) => ({ x: 170 + OFFSETS[li % OFFSETS.length], y: 36 + li * 138 }));
-    const d = pts.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i-1].x} ${pts[i-1].y + 56}, ${p.x} ${p.y - 56}, ${p.x} ${p.y}`).join(' ');
-    const trail = `<svg class="path-trail" viewBox="0 0 340 ${pts.length * 138 + 20}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${u.color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="0.1 17" opacity=".5"/></svg>`;
-    const decor = (UNIT_DECOR[u.id] || []).map((e, i) => `<span class="path-emoji" style="top:${150 + i * 240}px;${i % 2 ? 'right:10px' : 'left:10px'};animation-delay:${i * .7}s">${e}</span>`).join('');
+    const pts = u.lessons.map((l, li) => ({ x: 170 + OFFSETS[li % OFFSETS.length], y: 70 + li * 172 }));
+    const d = pts.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i-1].x} ${pts[i-1].y + 70}, ${p.x} ${p.y - 70}, ${p.x} ${p.y}`).join(' ');
+    const trail = `<svg class="path-trail" viewBox="0 0 340 ${pts.length * 172 + 30}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${u.color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="0.1 17" opacity=".5"/></svg>`;
     const nodes = u.lessons.map((l, li) => {
       gi++;
       const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
@@ -256,7 +255,7 @@ function pathHtml() {
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
     return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${u.icon}</div>
       <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
-      <div class="path">${trail}${decor}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
+      <div class="path">${trail}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
   }).join('');
   return `<div class="screen" style="padding-top:10px">
     <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> Финансы</button>
@@ -384,9 +383,7 @@ function renderLesson() {
     body = `<span class="phase-tag">❓ Вопрос ${n} из ${L.totalQ}</span>
       <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('think')}</div>
         <div class="bubble" style="font-size:17px"><b>${step.q}</b></div></div>
-      <div id="opts">${step.type === 'num'
-        ? `<input class="numinput" id="numin" type="number" inputmode="numeric" placeholder="Введи число"><div style="font-size:12.5px;color:var(--muted);font-weight:800;margin:-4px 0 10px">Только цифры, без пробелов</div>`
-        : step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
+      <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
       <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
   } else { // recap
     body = `<span class="phase-tag recap">🧠 Закрепим</span>
@@ -405,35 +402,25 @@ function renderLesson() {
   if (next) next.onclick = () => { haptic(); advance(); };
   if (step.kind === 'quiz') {
     const checkBtn = document.getElementById('check');
-    if (step.type === 'num') {
-      const inp = document.getElementById('numin');
-      inp.addEventListener('input', () => { L.selected = inp.value.trim(); checkBtn.disabled = L.selected === ''; });
-    } else {
-      app.querySelectorAll('[data-opt]').forEach((b) => b.onclick = () => {
-        if (L.checked) return;
-        L.selected = Number(b.dataset.opt); haptic();
-        app.querySelectorAll('[data-opt]').forEach((x) => x.classList.toggle('sel', x === b));
-        checkBtn.disabled = false;
-      });
-    }
+    app.querySelectorAll('[data-opt]').forEach((b) => b.onclick = () => {
+      if (L.checked) return;
+      L.selected = Number(b.dataset.opt); haptic();
+      app.querySelectorAll('[data-opt]').forEach((x) => x.classList.toggle('sel', x === b));
+      checkBtn.disabled = false;
+    });
     checkBtn.onclick = checkAnswer;
   }
 }
 function checkAnswer() {
   const cta = app.querySelector('.lesson-body .sticky-cta'); if (cta) cta.remove();
   const step = L.steps[L.idx];
-  const ok = step.type === 'num' ? Number(L.selected) === Number(step.answer) : L.selected === step.correct;
+  const ok = L.selected === step.correct;
   L.checked = true;
   if (ok) { L.correct++; notify('success'); beep(true); } else { state.hearts = Math.max(0, state.hearts - 1); save(); notify('error'); haptic('heavy'); beep(false); }
-  if (step.type !== 'num') {
-    app.querySelectorAll('[data-opt]').forEach((b) => {
-      b.disabled = true; const i = Number(b.dataset.opt);
-      if (i === step.correct) b.classList.add('right'); else if (i === L.selected) b.classList.add('wrong');
-    });
-  } else {
-    const inp = document.getElementById('numin');
-    if (inp) { inp.disabled = true; inp.style.borderColor = ok ? '#58cc02' : '#ff4b4b'; inp.style.background = ok ? '#d7ffb8' : '#ffdfe0'; }
-  }
+  app.querySelectorAll('[data-opt]').forEach((b) => {
+    b.disabled = true; const i = Number(b.dataset.opt);
+    if (i === step.correct) b.classList.add('right'); else if (i === L.selected) b.classList.add('wrong');
+  });
   const fb = document.createElement('div');
   fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
   fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(ok ? 'happy' : 'oops')}</div>

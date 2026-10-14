@@ -109,8 +109,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .opt.right{border-color:var(--green);background:#d7ffb8;color:#256d00;animation:pop .35s ease}
 .opt.wrong{border-color:var(--red);background:#ffdfe0;color:#c62828;animation:shake .4s ease}
 .opt:disabled{cursor:default}
-.numinput{width:100%;border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;padding:15px 16px;font-size:19px;font-weight:900;font-family:inherit;outline:none;margin-bottom:12px;background:#f8fafc}
-.numinput:focus{border-color:#a5d8ff;background:#fff}
 .feedback{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:60;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:slideUp .35s cubic-bezier(.2,.9,.3,1.15) both;border-top-left-radius:22px;border-top-right-radius:22px}
 .feedback.ok{background:#d7ffb8}.feedback.bad{background:#ffdfe0}
 .feedback h3{margin:0 0 4px;font-size:20px;font-weight:900;display:flex;gap:8px;align-items:center}
@@ -290,7 +288,7 @@ body.dark .topbar,body.dark .tabbar{background:#171d19;border-color:var(--line)}
 body.dark .cardbox,body.dark .course-tile,body.dark .cat-card,body.dark .opt,body.dark .bubble,body.dark .modal-card,body.dark .onboard,body.dark .recap-item{background:#1d251f;color:var(--ink);border-color:var(--line)}
 body.dark .onboard.splash{background:var(--green)}
 body.dark .bubble::after{border-right-color:#1d251f}
-body.dark .name-input,body.dark .numinput{background:#171d19;color:#fff;border-color:var(--line)}
+body.dark .name-input{background:#171d19;color:#fff;border-color:var(--line)}
 body.dark .tab.active{background:#243021}
 body.dark .start-bubble{background:#1d251f;border-color:var(--line)}
 body.dark .feedback{color:#263238}
@@ -314,3 +312,13 @@ body.dark .dots i{background:#33413a}
 .path-art{animation:artFloat 6s ease-in-out infinite}
 @keyframes artFloat{0%,100%{transform:translateX(-50%) rotate(-6deg) translateY(0)}50%{transform:translateX(-50%) rotate(-4deg) translateY(-10px)}}
 .node-wrap .node.current{animation:fadeUp .4s ease both,nodePulse 1.6s .45s ease-in-out infinite}
+/* ── Чтобы ничего не наезжало друг на друга ─────────────────────────── */
+.node-wrap{height:172px;padding-top:36px}
+.start-bubble{top:0}
+.feedback p{margin-right:86px}
+.feedback .btn{clear:both}
+.unit-banner>div:nth-child(2){flex:1;min-width:0}
+.cat-art{padding-bottom:12px}
+.greet-row,.mascot-row{min-width:0}
+.bubble{min-width:0;overflow-wrap:break-word}
+@media (max-width:380px){.stat{gap:8px;font-size:13px}.logo{font-size:24px}.topbar{padding:10px}}
