@@ -99,6 +99,7 @@ function render() {
 
 // ── Онбординг ───────────────────────────────
 function renderOnboarding() {
+  app.classList.remove('in-lesson');
   if (flow === 'splash') {
     app.innerHTML = `<div class="onboard splash">
       <div class="spacer"></div>
@@ -159,7 +160,7 @@ function tabbar() {
     <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">👤</span>Профиль</button></nav>`;
 }
 function renderApp() {
-  applyTheme();
+  applyTheme(); app.classList.remove('in-lesson');
   let html = '';
   if (appTab === 'courses') html = inPath ? pathHtml() : (catView === 'finance' ? financeHtml() : catalogHtml());
   else if (appTab === 'profile') html = profileHtml();
@@ -368,6 +369,7 @@ function startLesson(lessonId) {
 function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; scrollCurrent = true; render(); }
 
 function renderLesson() {
+  app.classList.add('in-lesson');
   const step = L.steps[L.idx];
   const progress = Math.round((L.idx / L.steps.length) * 100);
   let body = '';
@@ -436,6 +438,7 @@ function advance() {
   renderLesson(); window.scrollTo(0, 0);
 }
 function finishLesson() {
+  app.classList.add('in-lesson');
   const lesson = L.lesson;
   const acc = L.totalQ ? L.correct / L.totalQ : 1;
   const firstTime = !state.completed[lesson.id];

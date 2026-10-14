@@ -322,3 +322,8 @@ body.dark .dots i{background:#33413a}
 .greet-row,.mascot-row{min-width:0}
 .bubble{min-width:0;overflow-wrap:break-word}
 @media (max-width:380px){.stat{gap:8px;font-size:13px}.logo{font-size:24px}.topbar{padding:10px}}
+/* Уроки — чистый белый фон без узора */
+#app.in-lesson{background:#fff;background-image:none}
+#app.in-lesson .lesson-head{background:#fff}
+body.dark #app.in-lesson{background:#121613;background-image:none}
+body.dark #app.in-lesson .lesson-head{background:#121613}
