@@ -1,137 +1,130 @@
-// ─────────────────────────────────────────────────────────────
-//  КУРСИЧ — кудрявый мальчик в очках. Полностью векторный (SVG).
-//  Эмоции: idle, happy, think, celebrate, sad, surprised,
-//          proud, sleepy, wink, love, oops
-// ─────────────────────────────────────────────────────────────
+// Курсич — SVG-персонаж. Чёрные кудри, круглые очки.
+// Глаза моргают (CSS .m-blink), голова слегка покачивается,
+// в обычной позе руки опущены; машет только в эмоции celebrate.
+
+const OPEN_EYES = `
+  <g class="m-blink">
+    <circle cx="86" cy="104" r="5.6" fill="#221d18"/>
+    <circle cx="134" cy="104" r="5.6" fill="#221d18"/>
+    <circle cx="88.2" cy="101.8" r="1.9" fill="#fff"/>
+    <circle cx="136.2" cy="101.8" r="1.9" fill="#fff"/>
+  </g>`;
+const CLOSED_HAPPY = `
+  <path d="M76 106 Q86 95 96 106" stroke="#221d18" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M124 106 Q134 95 144 106" stroke="#221d18" stroke-width="4" fill="none" stroke-linecap="round"/>`;
 
 const FACES = {
-  idle: {
-    eyes: `<circle cx="86" cy="104" r="5.5" fill="#26231f"/><circle cx="134" cy="104" r="5.5" fill="#26231f"/>
-           <circle cx="88" cy="102" r="1.8" fill="#fff"/><circle cx="136" cy="102" r="1.8" fill="#fff"/>`,
-    mouth: `<path d="M98 128 Q110 137 122 128" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
-    extra: '',
-  },
-  happy: {
-    eyes: `<path d="M76 106 Q86 95 96 106" stroke="#26231f" stroke-width="4" fill="none" stroke-linecap="round"/>
-           <path d="M124 106 Q134 95 144 106" stroke="#26231f" stroke-width="4" fill="none" stroke-linecap="round"/>`,
-    mouth: `<path d="M95 124 Q110 142 125 124 Q110 130 95 124Z" fill="#7c2d12"/><path d="M101 133 Q110 139 119 133 Q110 136 101 133Z" fill="#fb7185"/>`,
-    extra: '',
-  },
+  idle: { eyes: OPEN_EYES, mouth: `<path d="M99 128 Q110 136 121 128" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`, extra: '' },
+  happy: { eyes: CLOSED_HAPPY, mouth: `<path d="M96 124 Q110 140 124 124 Q110 129 96 124Z" fill="#7c2d12"/><path d="M102 132 Q110 137 118 132 Q110 135 102 132Z" fill="#fb7185"/>`, extra: '' },
   think: {
-    eyes: `<circle cx="86" cy="101" r="5.5" fill="#26231f"/><circle cx="134" cy="101" r="5.5" fill="#26231f"/>
-           <path d="M74 88 Q86 82 97 88" stroke="#5b3a29" stroke-width="4" fill="none" stroke-linecap="round"/>
-           <path d="M123 88 Q134 82 146 88" stroke="#5b3a29" stroke-width="4" fill="none" stroke-linecap="round"/>`,
-    mouth: `<path d="M100 132 Q110 128 120 132" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
-    extra: `<g class="mascot-think"><circle cx="172" cy="52" r="14" fill="#fff" stroke="#e5e0d5" stroke-width="2.5"/><text x="172" y="59" text-anchor="middle" font-size="17" font-weight="900" fill="#f59e0b" font-family="Nunito,sans-serif">?</text><circle cx="156" cy="72" r="6" fill="#fff" stroke="#e5e0d5" stroke-width="2"/><circle cx="148" cy="84" r="3.5" fill="#fff" stroke="#e5e0d5" stroke-width="1.5"/></g>`,
+    eyes: OPEN_EYES,
+    mouth: `<path d="M101 132 Q110 129 119 132" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    extra: `<g class="m-think"><circle cx="174" cy="50" r="13" fill="#fff" stroke="#e7e2d9" stroke-width="2.5"/><text x="174" y="57" text-anchor="middle" font-size="16" font-weight="900" fill="#f59e0b" font-family="Nunito,sans-serif">?</text><circle cx="159" cy="69" r="5.5" fill="#fff" stroke="#e7e2d9" stroke-width="2"/><circle cx="151" cy="80" r="3.2" fill="#fff" stroke="#e7e2d9" stroke-width="1.5"/></g>`,
   },
   celebrate: {
-    eyes: `<path d="M76 104 Q86 92 96 104" stroke="#26231f" stroke-width="4" fill="none" stroke-linecap="round"/>
-           <path d="M124 104 Q134 92 144 104" stroke="#26231f" stroke-width="4" fill="none" stroke-linecap="round"/>`,
-    mouth: `<ellipse cx="110" cy="132" rx="11" ry="12" fill="#7c2d12"/><ellipse cx="110" cy="138" rx="7" ry="5" fill="#fb7185"/>`,
-    extra: `<text x="34" y="42" font-size="20" class="mascot-star">⭐</text><text x="168" y="34" font-size="16" class="mascot-star2">⭐</text><text x="182" y="76" font-size="13" class="mascot-star">✨</text>`,
+    eyes: CLOSED_HAPPY,
+    mouth: `<ellipse cx="110" cy="132" rx="10" ry="11" fill="#7c2d12"/><ellipse cx="110" cy="137" rx="6.5" ry="4.6" fill="#fb7185"/>`,
+    extra: `<text x="30" y="40" font-size="17" class="m-star">⭐</text><text x="182" y="70" font-size="12" class="m-star2">✨</text>`,
   },
   sad: {
-    eyes: `<circle cx="86" cy="106" r="5" fill="#26231f"/><circle cx="134" cy="106" r="5" fill="#26231f"/>
-           <path d="M75 90 Q86 96 97 91" stroke="#5b3a29" stroke-width="4" fill="none" stroke-linecap="round"/>
-           <path d="M123 91 Q134 96 145 90" stroke="#5b3a29" stroke-width="4" fill="none" stroke-linecap="round"/>`,
-    mouth: `<path d="M98 138 Q110 128 122 138" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
-    extra: `<path d="M62 112 q-6 12 0 16 q6 -4 0 -16Z" fill="#38bdf8" class="mascot-tear"/><path d="M158 112 q-6 12 0 16 q6 -4 0 -16Z" fill="#38bdf8" class="mascot-tear"/>`,
+    eyes: OPEN_EYES,
+    mouth: `<path d="M99 137 Q110 128 121 137" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    extra: `<path d="M63 114 q-5 11 0 15 q5 -4 0 -15Z" fill="#38bdf8" class="m-tear"/>`,
   },
   oops: {
-    eyes: `<circle cx="86" cy="104" r="5" fill="#26231f"/><circle cx="134" cy="104" r="6.5" fill="#26231f"/>
-           <circle cx="88" cy="102" r="1.6" fill="#fff"/><circle cx="136" cy="102" r="2" fill="#fff"/>`,
-    mouth: `<path d="M98 133 Q104 128 110 133 Q116 138 122 133" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
-    extra: `<path d="M168 60 q4 -14 14 -16 q-2 12 -14 16Z" fill="#a3e635"/><circle cx="176" cy="38" r="3" fill="#fbbf24"/>`,
+    eyes: OPEN_EYES,
+    mouth: `<path d="M99 133 Q104 128 110 133 Q116 138 121 133" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    extra: `<path d="M170 58 q3 -13 13 -15 q-2 11 -13 15Z" fill="#a3e635"/>`,
   },
   surprised: {
-    eyes: `<circle cx="86" cy="104" r="8" fill="#fff" stroke="#26231f" stroke-width="2.5"/><circle cx="86" cy="105" r="4" fill="#26231f"/>
-           <circle cx="134" cy="104" r="8" fill="#fff" stroke="#26231f" stroke-width="2.5"/><circle cx="134" cy="105" r="4" fill="#26231f"/>`,
-    mouth: `<ellipse cx="110" cy="133" rx="8" ry="10" fill="#7c2d12"/>`,
-    extra: `<text x="170" y="48" font-size="22" font-weight="900" fill="#ef4444" font-family="Nunito,sans-serif" class="mascot-bang">!</text>`,
+    eyes: `<g class="m-blink"><circle cx="86" cy="104" r="7.6" fill="#fff" stroke="#221d18" stroke-width="2.4"/><circle cx="86" cy="105" r="3.8" fill="#221d18"/><circle cx="134" cy="104" r="7.6" fill="#fff" stroke="#221d18" stroke-width="2.4"/><circle cx="134" cy="105" r="3.8" fill="#221d18"/></g>`,
+    mouth: `<ellipse cx="110" cy="133" rx="7.5" ry="9.5" fill="#7c2d12"/>`,
+    extra: `<text x="172" y="46" font-size="21" font-weight="900" fill="#ef4444" font-family="Nunito,sans-serif" class="m-bang">!</text>`,
   },
   proud: {
-    eyes: `<g><rect x="68" y="94" width="36" height="20" rx="9" fill="#26231f"/><rect x="116" y="94" width="36" height="20" rx="9" fill="#26231f"/><rect x="72" y="97" width="12" height="5" rx="2.5" fill="#fff" opacity=".35"/><rect x="120" y="97" width="12" height="5" rx="2.5" fill="#fff" opacity=".35"/></g>`,
-    mouth: `<path d="M97 127 Q110 138 124 126" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M118 124 l7 -4" stroke="#26231f" stroke-width="3" stroke-linecap="round"/>`,
-    extra: `<text x="166" y="46" font-size="20" class="mascot-star">🏆</text>`,
+    eyes: `<g><rect x="69" y="95" width="34" height="18" rx="9" fill="#221d18"/><rect x="117" y="95" width="34" height="18" rx="9" fill="#221d18"/><rect x="73" y="98" width="11" height="4.6" rx="2.3" fill="#fff" opacity=".35"/><rect x="121" y="98" width="11" height="4.6" rx="2.3" fill="#fff" opacity=".35"/></g>`,
+    mouth: `<path d="M98 127 Q110 137 123 126" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    extra: `<text x="168" y="44" font-size="18" class="m-star">🏆</text>`,
   },
   sleepy: {
-    eyes: `<path d="M77 104 Q86 110 95 104" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-           <path d="M125 104 Q134 110 143 104" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
-    mouth: `<ellipse cx="110" cy="131" rx="6" ry="7" fill="#7c2d12"/>`,
-    extra: `<text x="164" y="52" font-size="19" font-weight="900" fill="#818cf8" font-family="Nunito,sans-serif" class="mascot-zzz">Z</text><text x="178" y="38" font-size="14" font-weight="900" fill="#a5b4fc" font-family="Nunito,sans-serif" class="mascot-zzz2">z</text><text x="188" y="27" font-size="10" font-weight="900" fill="#c7d2fe" font-family="Nunito,sans-serif" class="mascot-zzz">z</text>`,
+    eyes: `<path d="M77 104 Q86 110 95 104" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M125 104 Q134 110 143 104" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    mouth: `<ellipse cx="110" cy="131" rx="5.5" ry="6.5" fill="#7c2d12"/>`,
+    extra: `<text x="166" y="52" font-size="17" font-weight="900" fill="#818cf8" font-family="Nunito,sans-serif" class="m-zzz">Z</text><text x="179" y="39" font-size="12" font-weight="900" fill="#a5b4fc" font-family="Nunito,sans-serif" class="m-zzz2">z</text>`,
   },
   wink: {
-    eyes: `<path d="M76 104 Q86 110 96 104" stroke="#26231f" stroke-width="4" fill="none" stroke-linecap="round"/>
-           <circle cx="134" cy="104" r="5.5" fill="#26231f"/><circle cx="136" cy="102" r="1.8" fill="#fff"/>`,
-    mouth: `<path d="M97 126 Q112 139 125 125" stroke="#26231f" stroke-width="3.5" fill="none" stroke-linecap="round"/><ellipse cx="122" cy="131" rx="5" ry="3.5" fill="#fb7185"/>`,
+    eyes: `<path d="M76 104 Q86 110 96 104" stroke="#221d18" stroke-width="3.8" fill="none" stroke-linecap="round"/><g class="m-blink"><circle cx="134" cy="104" r="5.6" fill="#221d18"/><circle cx="136.2" cy="101.8" r="1.9" fill="#fff"/></g>`,
+    mouth: `<path d="M98 126 Q112 138 124 125" stroke="#221d18" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
     extra: '',
   },
   love: {
-    eyes: `<text x="86" y="112" text-anchor="middle" font-size="17">❤️</text><text x="134" y="112" text-anchor="middle" font-size="17">❤️</text>`,
-    mouth: `<path d="M95 124 Q110 142 125 124 Q110 130 95 124Z" fill="#7c2d12"/>`,
-    extra: `<text x="36" y="50" font-size="15" class="mascot-star">💛</text><text x="172" y="44" font-size="13" class="mascot-star2">💛</text>`,
+    eyes: `<text x="86" y="112" text-anchor="middle" font-size="16">❤️</text><text x="134" y="112" text-anchor="middle" font-size="16">❤️</text>`,
+    mouth: `<path d="M96 124 Q110 140 124 124 Q110 129 96 124Z" fill="#7c2d12"/>`,
+    extra: '',
   },
 };
 
-// Позы рук: обычная / празднование (руки вверх)
+// Руки: обычно опущены вдоль тела. celebrate — машет одной рукой.
 const ARMS = {
-  normal: `<path d="M52 176 Q34 162 36 142" stroke="#46a302" stroke-width="15" fill="none" stroke-linecap="round"/>
-           <path d="M168 176 Q186 162 184 142" stroke="#46a302" stroke-width="15" fill="none" stroke-linecap="round"/>
-           <circle cx="36" cy="140" r="8" fill="#ffcf9f"/><circle cx="184" cy="140" r="8" fill="#ffcf9f"/>`,
-  celebrate: `<path d="M54 168 Q28 138 30 108" stroke="#46a302" stroke-width="15" fill="none" stroke-linecap="round"/>
-              <path d="M166 168 Q192 138 190 108" stroke="#46a302" stroke-width="15" fill="none" stroke-linecap="round"/>
-              <circle cx="30" cy="105" r="8.5" fill="#ffcf9f"/><circle cx="190" cy="105" r="8.5" fill="#ffcf9f"/>`,
-  think: `<path d="M52 176 Q34 162 36 142" stroke="#46a302" stroke-width="15" fill="none" stroke-linecap="round"/>
-          <path d="M168 176 Q188 166 176 148" stroke="#46a302" stroke-width="15" fill="none" stroke-linecap="round"/>
-          <circle cx="36" cy="140" r="8" fill="#ffcf9f"/><circle cx="174" cy="145" r="8" fill="#ffcf9f"/>`,
+  normal: (c) => `
+    <path d="M60 172 Q44 184 42 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M160 172 Q176 184 178 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <circle cx="42" cy="204" r="7.5" fill="#ffd3a6"/><circle cx="178" cy="204" r="7.5" fill="#ffd3a6"/>`,
+  celebrate: (c) => `
+    <path d="M60 172 Q44 184 42 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <circle cx="42" cy="204" r="7.5" fill="#ffd3a6"/>
+    <g class="m-wave"><path d="M160 170 Q182 156 188 132" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/><circle cx="189" cy="129" r="7.5" fill="#ffd3a6"/></g>`,
+  think: (c) => `
+    <path d="M60 172 Q44 184 42 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <circle cx="42" cy="204" r="7.5" fill="#ffd3a6"/>
+    <path d="M160 172 Q178 168 168 148" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <circle cx="166" cy="145" r="7.5" fill="#ffd3a6"/>`,
 };
 
-export function mascotSVG(emotion = 'happy', extraClass = '') {
-  const f = FACES[emotion] || FACES.happy;
-  const arms = emotion === 'celebrate' ? ARMS.celebrate : emotion === 'think' ? ARMS.think : ARMS.normal;
-  const hoodie = emotion === 'proud' ? '#8b5cf6' : emotion === 'sleepy' ? '#6366f1' : '#58cc02';
-  const hoodieDark = emotion === 'proud' ? '#7c3aed' : emotion === 'sleepy' ? '#4f46e5' : '#46a302';
+export function mascotSVG(emotion = 'idle', extraClass = '') {
+  const f = FACES[emotion] || FACES.idle;
+  const armsFn = emotion === 'celebrate' ? ARMS.celebrate : emotion === 'think' ? ARMS.think : ARMS.normal;
+  const hoodie = emotion === 'sleepy' ? '#6366f1' : '#58cc02';
+  const dark = emotion === 'sleepy' ? '#4f46e5' : '#46a302';
   return `
-  <svg class="mascot-svg ${extraClass}" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич — кудрявый мальчик в очках">
-    <!-- тело / худи -->
-    <path d="M58 218 Q58 162 110 162 Q162 162 162 218 Z" fill="${hoodie}"/>
-    <path d="M92 166 h36 l-6 26 h-24 Z" fill="${hoodieDark}" opacity=".55"/>
-    <circle cx="110" cy="182" r="4" fill="#fff" opacity=".8"/>
-    <path d="M88 164 Q110 178 132 164" stroke="${hoodieDark}" stroke-width="5" fill="none" stroke-linecap="round"/>
-    ${arms.replaceAll('#46a302', hoodieDark)}
-    <!-- уши -->
-    <circle cx="57" cy="106" r="10" fill="#ffcf9f"/><circle cx="163" cy="106" r="10" fill="#ffcf9f"/>
-    <circle cx="57" cy="106" r="4.5" fill="#f0a868"/><circle cx="163" cy="106" r="4.5" fill="#f0a868"/>
-    <!-- лицо -->
-    <ellipse cx="110" cy="104" rx="54" ry="50" fill="#ffcf9f"/>
-    <!-- румянец -->
-    <ellipse cx="72" cy="122" rx="9" ry="5.5" fill="#fb9a7a" opacity=".65"/>
-    <ellipse cx="148" cy="122" rx="9" ry="5.5" fill="#fb9a7a" opacity=".65"/>
-    <!-- веснушки -->
-    <circle cx="80" cy="116" r="1.4" fill="#e08a4c"/><circle cx="88" cy="119" r="1.4" fill="#e08a4c"/><circle cx="132" cy="119" r="1.4" fill="#e08a4c"/><circle cx="140" cy="116" r="1.4" fill="#e08a4c"/>
-    <!-- нос -->
-    <path d="M108 112 Q113 118 108 122" stroke="#e08a4c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    ${f.eyes}
-    ${f.mouth}
-    <!-- очки -->
-    <g stroke="#26231f" stroke-width="3.5">
-      <circle cx="86" cy="104" r="21" fill="#ffffff" fill-opacity="0.06"/>
-      <circle cx="134" cy="104" r="21" fill="#ffffff" fill-opacity="0.06"/>
-      <path d="M107 100 Q110 96 113 100" fill="none" stroke-linecap="round"/>
-      <path d="M65 100 L54 94 M155 100 L166 94" stroke-linecap="round"/>
+  <svg class="mascot-svg ${extraClass}" viewBox="0 0 220 222" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич">
+    <ellipse cx="110" cy="212" rx="58" ry="7" fill="#000" opacity="0.07"/>
+    <g class="m-breathe">
+      <path d="M60 220 Q58 164 110 164 Q162 164 160 220 Z" fill="${hoodie}"/>
+      <path d="M88 196 h44 v18 a6 6 0 0 1 -6 6 h-32 a6 6 0 0 1 -6 -6 Z" fill="${dark}" opacity=".5"/>
+      <path d="M90 166 Q110 179 130 166" stroke="${dark}" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M101 168 v10 M119 168 v10" stroke="${dark}" stroke-width="4" stroke-linecap="round"/>
+      ${armsFn(dark)}
     </g>
-    <path d="M72 90 Q80 82 92 84" stroke="#fff" stroke-width="3" opacity=".45" fill="none" stroke-linecap="round"/>
-    <!-- КУДРИ -->
-    <g fill="#4a2c17">
-      <circle cx="62" cy="66" r="15"/><circle cx="78" cy="52" r="17"/><circle cx="98" cy="44" r="18"/>
-      <circle cx="120" cy="44" r="17"/><circle cx="140" cy="52" r="16"/><circle cx="156" cy="66" r="14"/>
-      <circle cx="54" cy="84" r="12"/><circle cx="166" cy="84" r="12"/>
-      <circle cx="86" cy="58" r="13" fill="#5d3a1f"/><circle cx="110" cy="54" r="14" fill="#5d3a1f"/><circle cx="132" cy="58" r="12" fill="#5d3a1f"/>
-      <circle cx="72" cy="70" r="9" fill="#6b4423"/><circle cx="148" cy="70" r="9" fill="#6b4423"/><circle cx="104" cy="40" r="9" fill="#6b4423"/>
+    <g class="m-head">
+      <circle cx="57" cy="107" r="9.5" fill="#ffd3a6"/><circle cx="163" cy="107" r="9.5" fill="#ffd3a6"/>
+      <ellipse cx="110" cy="105" rx="53" ry="49" fill="#ffd3a6"/>
+      <ellipse cx="73" cy="122" rx="8.5" ry="5" fill="#fb9a7a" opacity=".55"/>
+      <ellipse cx="147" cy="122" rx="8.5" ry="5" fill="#fb9a7a" opacity=".55"/>
+      <path d="M108 113 Q112 118 108 122" stroke="#e09a5f" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      ${f.eyes}
+      ${f.mouth}
+      <g stroke="#221d18" stroke-width="3.4">
+        <circle cx="86" cy="104" r="20.5" fill="#fff" fill-opacity="0.05"/>
+        <circle cx="134" cy="104" r="20.5" fill="#fff" fill-opacity="0.05"/>
+        <path d="M106.5 100 Q110 96.5 113.5 100" fill="none" stroke-linecap="round"/>
+        <path d="M65.5 100 L55 95 M154.5 100 L165 95" stroke-linecap="round"/>
+      </g>
+      <path d="M73 91 Q80 84 91 85" stroke="#fff" stroke-width="2.8" opacity=".4" fill="none" stroke-linecap="round"/>
+      <g class="m-hair">
+        <g fill="#17120e">
+          <circle cx="63" cy="67" r="14.5"/><circle cx="79" cy="53" r="16.5"/><circle cx="99" cy="45" r="17.5"/>
+          <circle cx="121" cy="45" r="16.5"/><circle cx="141" cy="53" r="15.5"/><circle cx="156" cy="67" r="13.5"/>
+          <circle cx="55" cy="84" r="11.5"/><circle cx="165" cy="84" r="11.5"/>
+        </g>
+        <g fill="#241c16">
+          <circle cx="87" cy="59" r="12.5"/><circle cx="110" cy="55" r="13.5"/><circle cx="132" cy="59" r="11.5"/>
+          <circle cx="73" cy="71" r="8.5"/><circle cx="147" cy="71" r="8.5"/><circle cx="104" cy="41" r="8.5"/>
+        </g>
+        <path d="M84 49 Q92 43 100 48" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+        <path d="M122 47 Q130 42 137 47" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      </g>
+      ${f.extra}
     </g>
-    <path d="M84 48 Q92 42 100 47" stroke="#8a5a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <path d="M122 46 Q130 41 137 46" stroke="#8a5a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
-    ${f.extra}
   </svg>`;
 }
 

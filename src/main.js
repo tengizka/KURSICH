@@ -1,23 +1,29 @@
 import './style.css';
-import { COURSE, OTHER_COURSES, SOURCES, ACHIEVEMENTS, totalLessons } from './course.js';
+import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { mascotSVG } from './mascot.js';
 
-// ── Telegram Mini App ───────────────────────────────
+// ── Telegram ───────────────────────────────
 const tg = window.Telegram?.WebApp;
-try {
-  tg?.ready(); tg?.expand();
-  tg?.setHeaderColor?.('#ffffff'); tg?.setBackgroundColor?.('#ffffff');
-} catch (e) { /* вне Telegram тоже работает */ }
-const haptic = (type = 'light') => { try { tg?.HapticFeedback?.impactOccurred(type); } catch (e) {} };
-const notify = (type) => { try { tg?.HapticFeedback?.notificationOccurred(type); } catch (e) {} };
+try { tg?.ready(); tg?.expand(); tg?.setHeaderColor?.('#ffffff'); tg?.setBackgroundColor?.('#ffffff'); } catch (e) {}
+const tgName = tg?.initDataUnsafe?.user?.first_name || '';
+const haptic = (t = 'light') => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (e) {} };
+const notify = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (e) {} };
 
 // ── Состояние ───────────────────────────────
-const KEY = 'kursich_state_v1';
+const KEY = 'kursich_state_v2';
 const todayStr = () => new Date().toISOString().slice(0, 10);
-const defaultState = () => ({ xp: 0, hearts: 5, streak: 0, bestStreak: 0, lastDay: null, completed: {}, seenAch: [] });
-let state = (() => { try { return { ...defaultState(), ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch (e) { return defaultState(); } })();
+const defaultState = () => ({ xp: 0, hearts: 5, streak: 0, bestStreak: 0, lastDay: null, completed: {}, seenAch: [], name: '', onboarded: false, sound: false });
+let state = (() => {
+  try {
+    const cur = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (cur) return { ...defaultState(), ...cur };
+    // перенос прогресса из первой версии (знакомство при этом показывается заново)
+    const old = JSON.parse(localStorage.getItem('kursich_state_v1') || 'null');
+    if (old) return { ...defaultState(), xp: old.xp || 0, hearts: old.hearts ?? 5, streak: old.streak || 0, bestStreak: old.bestStreak || 0, lastDay: old.lastDay || null, completed: old.completed || {}, seenAch: old.seenAch || [] };
+    return defaultState();
+  } catch (e) { return defaultState(); }
+})();
 function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
-// серия дней
 (function touchStreak() {
   const t = todayStr();
   if (state.lastDay !== t) {
@@ -27,21 +33,33 @@ function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
     state.lastDay = t; state.hearts = 5; save();
   }
 })();
+// Короткий звук — только если включён в настройках. Музыки в приложении нет.
+let audioCtx = null;
+function beep(ok) {
+  if (!state.sound) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.value = ok ? 880 : 220; g.gain.value = 0.06;
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18); o.stop(audioCtx.currentTime + 0.2);
+  } catch (e) {}
+}
 
 const app = document.getElementById('app');
 const allLessons = COURSE.units.flatMap((u) => u.lessons.map((l) => ({ ...l, unit: u })));
 const doneCount = () => Object.keys(state.completed).length;
 const level = () => Math.floor(state.xp / 100) + 1;
-const levelProgress = () => (state.xp % 100) / 100;
 const firstUndoneIdx = () => allLessons.findIndex((l) => !state.completed[l.id]);
-function isUnlocked(globalIdx) { const f = firstUndoneIdx(); return f === -1 || globalIdx <= f; }
+const isUnlocked = (i) => { const f = firstUndoneIdx(); return f === -1 || i <= f; };
+const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function toast(msg) {
   const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
   document.getElementById('toast-root').appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 320); }, 2400);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 320); }, 2300);
 }
-function confetti(n = 70) {
+function confetti(n = 60) {
   const root = document.getElementById('confetti-root');
   const colors = ['#58cc02', '#1cb0f6', '#ffc800', '#ff4b4b', '#ce82ff', '#ff9600'];
   for (let i = 0; i < n; i++) {
@@ -55,221 +73,285 @@ function checkAchievements() {
   ACHIEVEMENTS.forEach((a) => {
     if (!state.seenAch.includes(a.id) && a.check(state)) {
       state.seenAch.push(a.id); save();
-      setTimeout(() => { toast(`${a.emoji} Достижение: ${a.title}!`); notify('success'); }, 500);
+      setTimeout(() => { toast(`${a.emoji} Достижение: ${a.title}`); notify('success'); }, 500);
     }
   });
 }
 
-// ── Каркас ───────────────────────────────
-let tab = 'learn';
-function topbar() {
-  return `<div class="topbar">
-    <div class="logo">КУРС<span>ИЧ</span></div>
-    <div class="stat">
-      <span class="flame">🔥 <b>${state.streak}</b></span>
-      <span class="gem">⭐ <b>${state.xp}</b></span>
-      <span class="heart">❤️ <b>${state.hearts}</b></span>
-    </div></div>`;
-}
-function tabbar() {
-  const t = (id, icon, label) => `<button class="tab ${tab === id ? 'active' : ''}" data-tab="${id}"><span class="ti">${icon}</span>${label}</button>`;
-  return `<nav class="tabbar">${t('learn', '🗺️', 'Учиться')}${t('courses', '📚', 'Курсы')}${t('ach', '🏆', 'Награды')}${t('me', '👤', 'Профиль')}</nav>`;
-}
-function shell(html) {
-  app.innerHTML = topbar() + html + tabbar();
-  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { tab = b.dataset.tab; haptic(); render(); window.scrollTo(0, 0); });
-  bindHome();
-}
-
-// ── Главная: путь уроков ───────────────────────────────
-const OFFSETS = [0, 48, 84, 48, 0, -48, -84, -48];
-function renderHome() {
-  const hour = new Date().getHours();
-  const mood = hour >= 23 || hour < 6 ? 'sleepy' : 'happy';
-  const greet = hour >= 23 || hour < 6 ? 'Не спишь? Один короткий урок — и спать!' : doneCount() === 0 ? 'Привет! Я Курсич. Начнём с денег — будет легко и по 5 минут!' : doneCount() >= totalLessons ? 'Ты прошёл весь курс! Загляни в награды, чемпион!' : 'С возвращением! Продолжим с того же места?';
-  let globalIdx = -1;
-  const unitsHtml = COURSE.units.map((u, ui) => {
-    const nodes = u.lessons.map((l, li) => {
-      globalIdx++;
-      const done = !!state.completed[l.id];
-      const unlocked = isUnlocked(globalIdx);
-      const current = unlocked && !done;
-      const off = OFFSETS[li % OFFSETS.length];
-      return `<div class="node-wrap" style="transform:translateX(${off}px);animation-delay:${li * 0.07}s">
-        ${current ? '<div class="start-bubble">СТАРТ</div>' : ''}
-        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}"
-          style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>
-          ${done ? '✓' : !unlocked ? '🔒' : l.icon}</button>
-        <div class="node-label ${!unlocked ? 'locked' : ''}">${l.title}</div>
-        ${done ? `<div class="mini-progress">${Math.round((state.completed[l.id] || 0) * 100)}% · +${l.xp} XP</div>` : `<div class="mini-progress">+${l.xp} XP</div>`}
-      </div>`;
-    }).join('');
-    const uDone = u.lessons.filter((l) => state.completed[l.id]).length;
-    return `<div class="unit-banner" style="background:${u.color};animation-delay:${ui * 0.05}s">
-        <div class="uicon">${u.icon}</div>
-        <div><h2>${u.title}</h2><p>${u.desc}</p></div>
-        <div class="ubadge">${uDone}/${u.lessons.length}</div></div>
-      <div class="path">${nodes}</div>`;
-  }).join('');
-
-  shell(`
-    <div class="hero">
-      <div class="hero-mascot">${mascotSVG(mood)}</div>
-      <div style="z-index:1;flex:1">
-        <h1>Финансовая грамотность 2026</h1>
-        <div class="speech">${greet}</div>
-      </div>
-    </div>
-    <div class="xpwrap">
-      <div class="xpmeta"><span>🏅 Уровень ${level()}</span><span>${state.xp % 100} / 100 XP до следующего</span></div>
-      <div class="bar"><i style="width:${Math.max(4, levelProgress() * 100)}%"></i></div>
-      <div class="xpmeta" style="margin-top:6px"><span>📘 Пройдено уроков: ${doneCount()} из ${totalLessons}</span><span>обновлено: ${COURSE.updated}</span></div>
-    </div>
-    ${unitsHtml}
-    <div style="height:14px"></div>`);
-}
-function bindHome() {
-  app.querySelectorAll('[data-lesson]').forEach((b) => {
-    b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); };
-  });
-  app.querySelectorAll('[data-soon]').forEach((b) => b.onclick = () => toast('🔜 Этот курс уже в работе у Курсича!'));
-  const back = app.querySelector('[data-back]');
-  if (back) back.onclick = () => { render(); };
-}
-
-// ── Курсы ───────────────────────────────
-const COURSE_COLORS = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff4b4b', '#ff86d0'];
-function renderCourses() {
-  shell(`<div class="screen">
-    <h2 class="st">📚 Все курсы</h2>
-    <p class="sub">Первый курс уже открыт. Остальные Курсич дописывает — они появятся здесь же, в КУРСИЧЕ.</p>
-    <button class="course-card" data-goto-learn style="border-color:#b8e986;background:#f4fde9">
-      <div class="ce" style="background:#d7ffb8">${COURSE.emoji}</div>
-      <div><h3>${COURSE.title} <span style="color:#46a302">· открыт</span></h3>
-      <p>${COURSE.subtitle}. ${totalLessons} уроков · обновлено: ${COURSE.updated}</p>
-      <span class="pill">Пройдено: ${doneCount()}/${totalLessons}</span></div><div style="margin-left:auto;font-size:22px">›</div>
-    </button>
-    ${OTHER_COURSES.map((c, i) => `
-    <button class="course-card" data-soon>
-      <div class="ce" style="background:${COURSE_COLORS[(i + 1) % COURSE_COLORS.length]}22">${c.emoji}</div>
-      <div><h3>${c.title}</h3><p>${c.desc}</p><span class="pill soon">🔜 Скоро · ${c.level}</span></div>
-      <div style="margin-left:auto;font-size:20px;opacity:.4">🔒</div>
-    </button>`).join('')}
-  </div>`);
-  const g = app.querySelector('[data-goto-learn]');
-  if (g) g.onclick = () => { tab = 'learn'; render(); };
-  bindHome();
-}
-
-// ── Награды ───────────────────────────────
-function renderAch() {
-  const got = ACHIEVEMENTS.filter((a) => a.check(state)).length;
-  shell(`<div class="screen">
-    <h2 class="st">🏆 Награды</h2>
-    <p class="sub">Получено ${got} из ${ACHIEVEMENTS.length}. Проходи уроки без ошибок и заходи каждый день — Курсич всё замечает.</p>
-    <div class="cardbox" style="padding:4px 16px">
-    ${ACHIEVEMENTS.map((a) => { const on = a.check(state); return `
-      <div class="ach ${on ? '' : 'off'}"><div class="ae">${a.emoji}</div>
-      <div><h4>${a.title}</h4><p>${a.desc}</p></div>
-      ${on ? '<div style="margin-left:auto;color:#46a302;font-weight:900">✓</div>' : ''}</div>`; }).join('')}
-    </div>
-    <div class="cardbox" style="display:flex;gap:14px;align-items:center">
-      <div style="width:92px;flex:none">${mascotSVG(state.streak >= 3 ? 'proud' : 'wink')}</div>
-      <div><h4 style="margin:0 0 4px;font-size:16px;font-weight:900">${state.streak >= 3 ? 'Серия горит! Так держать!' : 'Заходи завтра — серия вырастет!'}</h4>
-      <p style="margin:0;font-size:13px;color:var(--muted);font-weight:700;line-height:1.4">Сейчас: 🔥 ${state.streak} дн. · рекорд: ${state.bestStreak || 0} дн. 5 минут в день сильнее, чем 5 часов раз в месяц.</p></div>
-    </div>
-  </div>`);
-}
-
-// ── Профиль / источники / эмоции ───────────────────────────────
-function renderMe() {
-  const emo = [['idle', 'Обычный'], ['happy', 'Радость'], ['think', 'Думает'], ['celebrate', 'Праздник'], ['sad', 'Грусть'], ['oops', 'Упс!'], ['surprised', 'Сюрприз'], ['proud', 'Гордость'], ['sleepy', 'Сонный'], ['wink', 'Подмигивает'], ['love', 'Влюблён в XP']];
-  shell(`<div class="screen">
-    <h2 class="st">👤 Профиль</h2>
-    <p class="sub">Твой прогресс хранится на этом устройстве и подхватывается при следующем открытии мини-аппа.</p>
-    <div class="cardbox" style="display:flex;gap:14px;align-items:center">
-      <div style="width:96px;flex:none">${mascotSVG('love')}</div>
-      <div>
-        <div style="font-size:19px;font-weight:900">Ученик КУРСИЧА</div>
-        <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">🏅 Уровень ${level()} · ⭐ ${state.xp} XP · ❤️ ${state.hearts}</div>
-        <div style="font-weight:800;color:var(--muted);font-size:13px">🔥 Серия ${state.streak} дн. · уроков: ${doneCount()}/${totalLessons}</div>
-      </div>
-    </div>
-    <h2 class="st">🎭 Курсич и его эмоции</h2>
-    <p class="sub">Наш герой вместо птицы — кудрявый мальчик в очках. Нарисован полностью в SVG: эмоции меняются по ситуации в уроках.</p>
-    <div class="gallery">${emo.map(([e, label]) => `<figure>${mascotSVG(e)}<figcaption>${label}</figcaption></figure>`).join('')}</div>
-    <h2 class="st">📖 Источники курса</h2>
-    <p class="sub">Курс собран по открытым источникам и актуализирован на ${COURSE.updated}. «Слитые» платные курсы мы не используем — только легальные и проверяемые материалы.</p>
-    ${SOURCES.map((s) => `<a class="src" href="${s.url}" target="_blank" rel="noopener"><h4>${s.title} ↗</h4><p>${s.desc}</p></a>`).join('')}
-    <div class="disclaimer">⚠️ КУРСИЧ — образовательное приложение, а не персональный финансовый советник. Цифры (ключевая ставка 14% на октябрь 2026, лимиты АСВ, ИИС-3 и ПДС) проверяй перед решениями на cbr.ru, в ФНС и на Госуслугах — правила меняются. Инвестиции всегда несут риск.</div>
-    <button class="btn ghost" id="reset-btn" style="margin-top:16px;color:#ff4b4b">Сбросить прогресс</button>
-  </div>`);
-  document.getElementById('reset-btn').onclick = () => {
-    if (confirm('Сбросить весь прогресс, XP и награды?')) { state = defaultState(); localStorage.removeItem(KEY); touchReload(); }
-  };
-}
-function touchReload() { const t = todayStr(); state.lastDay = t; state.streak = 1; state.bestStreak = 1; save(); render(); toast('Прогресс сброшен. Начинаем заново! 🌱'); }
+// ── Навигация ───────────────────────────────
+let flow = state.onboarded ? 'app' : 'splash'; // splash → name → tutorial → app
+let tutIdx = 0;
+let appTab = 'courses'; // courses | profile | ach | settings
+let inPath = false;
 
 function render() {
-  if (tab === 'learn') renderHome();
-  else if (tab === 'courses') renderCourses();
-  else if (tab === 'ach') renderAch();
-  else renderMe();
+  document.querySelectorAll('.feedback,.modal-back').forEach((e) => e.remove());
+  if (flow !== 'app') return renderOnboarding();
+  renderApp();
 }
 
-// ── Урок ───────────────────────────────
-let L = null; // {lesson, steps, idx, correct, wrong, selected, checked, xpEarned}
+// ── Онбординг ───────────────────────────────
+function renderOnboarding() {
+  if (flow === 'splash') {
+    app.innerHTML = `<div class="onboard splash">
+      <div class="spacer"></div>
+      <div class="splash-mascot">${mascotSVG('celebrate')}</div>
+      <div class="wordmark">курсич</div>
+      <div class="splash-tag">Короткие уроки. По пять минут в день.</div>
+      <button class="btn white" id="ob-start">Начать</button>
+      <div class="spacer"></div>
+    </div>`;
+    document.getElementById('ob-start').onclick = () => { haptic('medium'); flow = 'name'; render(); };
+    return;
+  }
+  if (flow === 'name') {
+    app.innerHTML = `<div class="onboard">
+      <div class="ob-mascot">${mascotSVG('idle')}</div>
+      <div class="ob-title">Как тебя зовут?</div>
+      <p class="ob-text">Так я буду к тебе обращаться.</p>
+      <input class="name-input" id="name-in" maxlength="24" placeholder="Твоё имя" value="${esc(state.name || tgName)}" autocomplete="off">
+      <div class="spacer"></div>
+      <button class="btn" id="ob-name" ${!(state.name || tgName) ? 'disabled' : ''}>Дальше</button>
+    </div>`;
+    const inp = document.getElementById('name-in'), btn = document.getElementById('ob-name');
+    inp.addEventListener('input', () => { btn.disabled = !inp.value.trim(); });
+    inp.focus();
+    btn.onclick = () => { state.name = inp.value.trim(); save(); haptic('medium'); tutIdx = 0; flow = 'tutorial'; render(); };
+    return;
+  }
+  // tutorial
+  const steps = [
+    { e: 'happy', t: `Привет${state.name ? ', ' + esc(state.name) : ''}!`, b: 'Я Курсич. Будем учиться понемногу — по одному короткому уроку в день.' },
+    { e: 'think', t: 'Сначала — понятно, потом — вопросы', b: 'В каждом уроке я сначала объясняю тему простыми словами. И только потом спрашиваю.' },
+    { e: 'wink', t: 'Ошибся? Ничего страшного', b: 'Подскажу, объясню ещё раз и ругать не буду. Главное — идти дальше.' },
+  ];
+  const s = steps[tutIdx], last = tutIdx === steps.length - 1;
+  app.innerHTML = `<div class="onboard">
+    <button class="skip" id="ob-skip" style="align-self:flex-end">Пропустить</button>
+    <div class="ob-mascot">${mascotSVG(s.e)}</div>
+    <div class="ob-title">${s.t}</div>
+    <p class="ob-text">${s.b}</p>
+    <div class="spacer"></div>
+    <div class="dots">${steps.map((_, i) => `<i class="${i === tutIdx ? 'on' : ''}"></i>`).join('')}</div>
+    <button class="btn" id="ob-next">${last ? 'К курсам' : 'Дальше'}</button>
+  </div>`;
+  document.getElementById('ob-skip').onclick = finishOnboarding;
+  document.getElementById('ob-next').onclick = () => { haptic(); if (last) finishOnboarding(); else { tutIdx++; render(); } };
+}
+function finishOnboarding() { state.onboarded = true; save(); flow = 'app'; appTab = 'courses'; inPath = false; haptic('medium'); render(); confetti(40); }
+
+// ── Каркас приложения ───────────────────────────────
+function topbar() {
+  return `<div class="topbar"><div class="logo">курсич</div>
+    <div class="stat"><span class="flame">🔥 <b>${state.streak}</b></span><span class="gem">⭐ <b>${state.xp}</b></span><span class="heart">❤️ <b>${state.hearts}</b></span></div></div>`;
+}
+function tabbar() {
+  const act = (id) => (appTab === id || (id === 'profile' && (appTab === 'ach' || appTab === 'settings')) ? 'active' : '');
+  return `<nav class="tabbar">
+    <button class="tab ${act('courses')}" data-tab="courses"><span class="ti">🎓</span>Курсы</button>
+    <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">👤</span>Профиль</button></nav>`;
+}
+function renderApp() {
+  let html = '';
+  if (appTab === 'courses') html = inPath ? pathHtml() : catalogHtml();
+  else if (appTab === 'profile') html = profileHtml();
+  else if (appTab === 'ach') html = achHtml();
+  else if (appTab === 'settings') html = settingsHtml();
+  app.innerHTML = topbar() + html + tabbar();
+  bindApp();
+}
+
+// ── Каталог курсов ───────────────────────────────
+const TILE_COLORS = ['#1cb0f6', '#ce82ff', '#ff9600', '#ff4b4b', '#ff86d0'];
+function catalogHtml() {
+  return `<div class="screen">
+    <div class="greet-row"><div class="gm">${mascotSVG('idle')}</div>
+      <div><h2>Привет${state.name ? ', ' + esc(state.name) : ''}!</h2><p>Выбери курс — и поехали.</p></div></div>
+    <div class="course-grid">
+      <button class="course-tile open" id="open-fin">
+        <div class="te">${COURSE.emoji}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
+        <span class="pill">${doneCount() ? `Пройдено ${doneCount()} из ${totalLessons}` : 'Начать'}</span>
+      </button>
+      ${OTHER_COURSES.map((c, i) => `<button class="course-tile locked" data-locked="${c.id}">
+        <div class="te">${c.emoji}</div><h3>${c.title}</h3><p>${c.desc}</p>
+        <span class="pill soon">🔒 Скоро</span></button>`).join('')}
+    </div>
+  </div>`;
+}
+function showLockedModal(course) {
+  const back = document.createElement('div'); back.className = 'modal-back';
+  back.innerHTML = `<div class="modal-card"><div class="mm">${mascotSVG('sleepy')}</div>
+    <h3>В разработке</h3><p>Курс «${esc(course.title)}» ещё пишется. Пока доступен курс финансовой грамотности.</p>
+    <button class="btn" id="modal-ok">Понятно</button></div>`;
+  document.body.appendChild(back);
+  const close = () => back.remove();
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
+  document.getElementById('modal-ok').onclick = () => { haptic(); close(); };
+}
+
+// ── Путь курса ───────────────────────────────
+const OFFSETS = [0, 48, 84, 48, 0, -48, -84, -48];
+function pathHtml() {
+  let gi = -1;
+  const units = COURSE.units.map((u) => {
+    const nodes = u.lessons.map((l, li) => {
+      gi++;
+      const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
+      return `<div class="node-wrap" style="transform:translateX(${OFFSETS[li % OFFSETS.length]}px)">
+        ${current ? '<div class="start-bubble">СТАРТ</div>' : ''}
+        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? '✓' : !unlocked ? '🔒' : l.icon}</button>
+        <div class="node-label ${!unlocked ? 'locked' : ''}">${l.title}</div>
+        <div class="mini-progress">+${l.xp} XP</div></div>`;
+    }).join('');
+    const ud = u.lessons.filter((l) => state.completed[l.id]).length;
+    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${u.icon}</div>
+      <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
+      <div class="path">${nodes}</div>`;
+  }).join('');
+  return `<div class="screen" style="padding-top:10px">
+    <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> Все курсы</button>
+    <h2 class="st" style="margin-top:6px">${COURSE.emoji} ${COURSE.title}</h2>
+    <p class="sub">${doneCount()} из ${totalLessons} уроков · уровень ${level()}</p>
+    <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (doneCount() / totalLessons) * 100)}%"></i></div>
+    ${units}</div>`;
+}
+
+// ── Профиль / достижения / настройки ───────────────────────────────
+function profileHtml() {
+  const got = ACHIEVEMENTS.filter((a) => a.check(state)).length;
+  return `<div class="screen">
+    <div class="cardbox" style="display:flex;gap:14px;align-items:center;margin-top:14px">
+      <div style="width:88px;flex:none">${mascotSVG('idle')}</div>
+      <div><div style="font-size:19px;font-weight:900">${esc(state.name) || 'Ученик'}</div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ⭐ ${state.xp} XP</div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px">🔥 ${state.streak} дн. · уроков: ${doneCount()}/${totalLessons}</div></div>
+    </div>
+    <div class="cardbox" style="padding:4px 16px">
+      <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf">🏆</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
+      <button class="menu-row" id="go-settings"><span class="mi" style="background:#eef2f5">⚙️</span>Настройки<span class="chev">›</span></button>
+    </div>
+  </div>`;
+}
+function achHtml() {
+  return `<div class="screen">
+    <button class="menu-row" data-back-profile style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Профиль</button>
+    <h2 class="st">🏆 Достижения</h2>
+    <div class="cardbox" style="padding:4px 16px">
+    ${ACHIEVEMENTS.map((a) => { const on = a.check(state); return `<div class="ach ${on ? '' : 'off'}"><div class="ae">${a.emoji}</div><div><h4>${a.title}</h4><p>${a.desc}</p></div>${on ? '<div style="margin-left:auto;color:#46a302;font-weight:900">✓</div>' : ''}</div>`; }).join('')}
+    </div></div>`;
+}
+function settingsHtml() {
+  return `<div class="screen">
+    <button class="menu-row" data-back-profile style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Профиль</button>
+    <h2 class="st">⚙️ Настройки</h2>
+    <div class="cardbox" style="padding:6px 16px">
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#e5f7d0">👋</span>Имя
+        <input class="name-input" id="set-name" style="margin-left:auto;width:46%;padding:9px 10px;font-size:15px;text-align:right" maxlength="24" value="${esc(state.name)}"></div>
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">🔔</span>Звуковые эффекты
+        <label class="switch"><input type="checkbox" id="set-sound" ${state.sound ? 'checked' : ''}><i></i></label></div>
+      <p class="set-note" style="padding:0 4px 12px">Музыки в приложении нет. Если звук выключен, остаются только вибрация в Telegram и анимации.</p>
+    </div>
+    <div class="cardbox" style="padding:6px 16px">
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">ℹ️</span>О приложении
+        <span style="margin-left:auto;font-weight:800;color:var(--muted);font-size:13px">курсич · версия 1.1</span></div>
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">📅</span>Материалы курсов
+        <span style="margin-left:auto;font-weight:800;color:var(--muted);font-size:13px">актуальны на октябрь 2026</span></div>
+      <p class="set-note" style="padding:0 4px 12px">Приложение учебное. Перед важными решениями о деньгах проверяй цифры в своём банке и на официальных сайтах.</p>
+    </div>
+    <button class="btn ghost" id="redo-ob" style="margin-bottom:12px">Пройти знакомство заново</button>
+    <button class="btn ghost" id="reset-all" style="color:#ff4b4b">Сбросить прогресс</button>
+  </div>`;
+}
+
+function bindApp() {
+  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); window.scrollTo(0, 0); });
+  const openFin = document.getElementById('open-fin');
+  if (openFin) openFin.onclick = () => { inPath = true; haptic('medium'); renderApp(); window.scrollTo(0, 0); };
+  app.querySelectorAll('[data-locked]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_COURSES.find((x) => x.id === b.dataset.locked); if (c) showLockedModal(c); });
+  const back = document.getElementById('back-catalog');
+  if (back) back.onclick = () => { inPath = false; haptic(); renderApp(); window.scrollTo(0, 0); };
+  app.querySelectorAll('[data-lesson]').forEach((b) => b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); });
+  const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); window.scrollTo(0, 0); };
+  const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); window.scrollTo(0, 0); };
+  app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); window.scrollTo(0, 0); });
+  const nameIn = document.getElementById('set-name');
+  if (nameIn) nameIn.addEventListener('change', () => { state.name = nameIn.value.trim(); save(); toast('Имя сохранено'); });
+  const soundIn = document.getElementById('set-sound');
+  if (soundIn) soundIn.addEventListener('change', () => { state.sound = soundIn.checked; save(); if (state.sound) beep(true); });
+  const redo = document.getElementById('redo-ob');
+  if (redo) redo.onclick = () => { state.onboarded = false; save(); flow = 'splash'; render(); window.scrollTo(0, 0); };
+  const reset = document.getElementById('reset-all');
+  if (reset) reset.onclick = () => {
+    if (confirm('Сбросить прогресс, XP и достижения?')) {
+      const keep = { name: state.name, onboarded: true, sound: state.sound };
+      state = { ...defaultState(), ...keep, lastDay: todayStr(), streak: 1, bestStreak: 1 };
+      save(); appTab = 'courses'; inPath = false; renderApp(); toast('Прогресс сброшен');
+    }
+  };
+}
+
+// ── Урок: теория → вопросы → закрепление ───────────────────────────────
+let L = null;
 function startLesson(lessonId) {
   const lesson = allLessons.find((l) => l.id === lessonId);
   if (!lesson) return;
-  const steps = [];
-  lesson.cards.forEach((c, i) => { steps.push({ kind: 'card', ...c }); if (lesson.quiz[i]) steps.push({ kind: 'quiz', ...lesson.quiz[i] }); });
-  lesson.quiz.slice(lesson.cards.length).forEach((q) => steps.push({ kind: 'quiz', ...q }));
-  L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, selected: null, checked: false, finished: false };
+  const steps = [
+    ...lesson.cards.map((c) => ({ kind: 'theory', ...c })),
+    { kind: 'intro' },
+    ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
+    { kind: 'recap' },
+  ];
+  L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false };
   try { tg?.BackButton?.show(); tg.BackButton.onClick(exitLesson); } catch (e) {}
   renderLesson();
 }
-function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} render(); window.scrollTo(0, 0); }
-function lessonProgress() { return Math.round((L.idx / L.steps.length) * 100); }
+function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; render(); window.scrollTo(0, 0); }
 
 function renderLesson() {
   const step = L.steps[L.idx];
-  const isCard = step.kind === 'card';
-  const moodCard = L.idx === 0 ? 'happy' : 'think';
-  app.innerHTML = `
-  <div style="max-width:480px;margin:0 auto">
-    <div class="lesson-head">
-      <button class="xclose" id="lx">✕</button>
-      <div class="bar lbar"><i style="width:${lessonProgress()}%;background:linear-gradient(90deg,#58cc02,#8ee000)"></i></div>
-      <div class="hearts-live">❤️ ${state.hearts}</div>
-    </div>
-    <div class="lesson-body" style="padding-bottom:120px">
-      ${isCard ? `
-        <div class="theory-e">${L.lesson.unit.icon} ${L.lesson.title}</div>
-        <div class="mascot-row"><div class="mwrap">${mascotSVG(moodCard)}</div>
-          <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
-        <div style="text-align:center;font-size:44px;animation:bob 2.4s ease-in-out infinite">${step.e}</div>
-        <div class="sticky-cta"><button class="btn" id="next">Понятно, дальше</button></div>`
-      : `
-        <div class="theory-e">❓ Вопрос ${L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length} из ${L.totalQ}</div>
-        <h2>${step.q}</h2>
-        <div id="opts">
-        ${step.type === 'num'
-          ? `<input class="numinput" id="numin" type="number" inputmode="numeric" placeholder="Введи число, ₽"><div style="font-size:12.5px;color:var(--muted);font-weight:800;margin:-4px 0 10px">Только цифры, без пробелов и знака ₽</div>`
-          : step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}
-        </div>
-        <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`}
-    </div>
-  </div>`;
+  const progress = Math.round((L.idx / L.steps.length) * 100);
+  let body = '';
+  if (step.kind === 'theory') {
+    const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'theory').length;
+    body = `<span class="phase-tag theory">📖 Сначала разберёмся · ${n} из ${L.theoryN}</span>
+      <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
+        <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
+      <div class="theory-visual">${step.e}</div>
+      <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
+  } else if (step.kind === 'intro') {
+    body = `<span class="phase-tag">❓ А теперь проверим</span>
+      <div class="mascot-row"><div class="mwrap">${mascotSVG('think')}</div>
+        <div class="bubble"><b>Вопросы по только что пройденному.</b><br>Ошибёшься — объясню ещё раз, ничего страшного.</div></div>
+      <div class="sticky-cta"><button class="btn" id="next">К вопросам</button></div>`;
+  } else if (step.kind === 'quiz') {
+    const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
+    body = `<span class="phase-tag">❓ Вопрос ${n} из ${L.totalQ}</span>
+      <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('think')}</div>
+        <div class="bubble" style="font-size:17px"><b>${step.q}</b></div></div>
+      <div id="opts">${step.type === 'num'
+        ? `<input class="numinput" id="numin" type="number" inputmode="numeric" placeholder="Введи число"><div style="font-size:12.5px;color:var(--muted);font-weight:800;margin:-4px 0 10px">Только цифры, без пробелов</div>`
+        : step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
+      <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
+  } else { // recap
+    body = `<span class="phase-tag recap">🧠 Закрепим</span>
+      <h2 style="margin-top:14px">Главное из урока</h2>
+      ${L.lesson.cards.map((c, i) => `<div class="recap-item"><span class="rn">${i + 1}</span><span>${c.t}</span></div>`).join('')}
+      <p style="font-weight:800;color:var(--muted);font-size:14px">Верных ответов: ${L.correct} из ${L.totalQ}. Это и есть закрепление — ты только что сам всё вспомнил.</p>
+      <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
+  }
+  app.innerHTML = `<div style="max-width:480px;margin:0 auto">
+    <div class="lesson-head"><button class="xclose" id="lx">✕</button>
+      <div class="bar lbar"><i style="width:${progress}%;background:linear-gradient(90deg,#58cc02,#8ee000)"></i></div>
+      <div class="hearts-live">❤️ ${state.hearts}</div></div>
+    <div class="lesson-body slide-in" style="padding-bottom:120px">${body}</div></div>`;
   document.getElementById('lx').onclick = () => { haptic(); exitLesson(); };
-  if (isCard) {
-    document.getElementById('next').onclick = () => { haptic(); advance(); };
-  } else {
+  const next = document.getElementById('next');
+  if (next) next.onclick = () => { haptic(); advance(); };
+  if (step.kind === 'quiz') {
     const checkBtn = document.getElementById('check');
     if (step.type === 'num') {
       const inp = document.getElementById('numin');
       inp.addEventListener('input', () => { L.selected = inp.value.trim(); checkBtn.disabled = L.selected === ''; });
-      inp.focus();
     } else {
       app.querySelectorAll('[data-opt]').forEach((b) => b.onclick = () => {
         if (L.checked) return;
@@ -283,27 +365,23 @@ function renderLesson() {
 }
 function checkAnswer() {
   const step = L.steps[L.idx];
-  let ok;
-  if (step.type === 'num') ok = Number(L.selected) === Number(step.answer);
-  else ok = L.selected === step.correct;
+  const ok = step.type === 'num' ? Number(L.selected) === Number(step.answer) : L.selected === step.correct;
   L.checked = true;
-  if (ok) { L.correct++; notify('success'); } else { state.hearts = Math.max(0, state.hearts - 1); save(); notify('error'); haptic('heavy'); }
-  // подсветка
+  if (ok) { L.correct++; notify('success'); beep(true); } else { state.hearts = Math.max(0, state.hearts - 1); save(); notify('error'); haptic('heavy'); beep(false); }
   if (step.type !== 'num') {
     app.querySelectorAll('[data-opt]').forEach((b) => {
-      b.disabled = true;
-      const i = Number(b.dataset.opt);
-      if (i === step.correct) b.classList.add('right');
-      else if (i === L.selected) b.classList.add('wrong');
+      b.disabled = true; const i = Number(b.dataset.opt);
+      if (i === step.correct) b.classList.add('right'); else if (i === L.selected) b.classList.add('wrong');
     });
   } else {
-    const inp = document.getElementById('numin'); if (inp) { inp.disabled = true; inp.style.borderColor = ok ? '#58cc02' : '#ff4b4b'; inp.style.background = ok ? '#d7ffb8' : '#ffdfe0'; }
+    const inp = document.getElementById('numin');
+    if (inp) { inp.disabled = true; inp.style.borderColor = ok ? '#58cc02' : '#ff4b4b'; inp.style.background = ok ? '#d7ffb8' : '#ffdfe0'; }
   }
   const fb = document.createElement('div');
   fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
-  fb.innerHTML = `<div class="fb-mascot">${mascotSVG(ok ? 'celebrate' : 'oops')}</div>
-    <h3>${ok ? '🎉 Верно!' : '💡 Не совсем'}</h3><p>${step.explain}</p>
-    <button class="btn ${ok ? '' : 'red'}" id="fb-next">${ok ? 'Дальше' : 'Понял, дальше'}</button>`;
+  fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(ok ? 'happy' : 'oops')}</div>
+    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${step.explain}</p>
+    <button class="btn ${ok ? '' : 'red'}" id="fb-next">Дальше</button>`;
   document.body.appendChild(fb);
   document.getElementById('fb-next').onclick = () => { fb.remove(); haptic(); advance(); };
 }
@@ -317,30 +395,26 @@ function finishLesson() {
   const lesson = L.lesson;
   const acc = L.totalQ ? L.correct / L.totalQ : 1;
   const firstTime = !state.completed[lesson.id];
-  const prev = state.completed[lesson.id] || 0;
-  state.completed[lesson.id] = Math.max(prev, acc);
+  state.completed[lesson.id] = Math.max(state.completed[lesson.id] || 0, acc);
   const xpGain = firstTime ? Math.round(lesson.xp * (0.5 + 0.5 * acc)) + (acc === 1 ? 5 : 0) : 2;
   state.xp += xpGain; save();
   const perfect = acc === 1;
   app.innerHTML = `<div style="max-width:480px;margin:0 auto"><div class="result">
-    <div class="mwrap">${mascotSVG(perfect ? 'celebrate' : 'proud')}</div>
+    <div class="mwrap">${mascotSVG('proud')}</div>
     <div class="big-xp">+${xpGain} XP</div>
-    <h2 style="margin:0;font-size:23px;font-weight:900">${perfect ? 'Идеально! Ни одной ошибки 🏆' : 'Урок пройден!'}</h2>
-    <p style="color:var(--muted);font-weight:700;margin:8px 0 0">«${lesson.title}» — в твою копилку знаний.</p>
+    <h2 style="margin:0;font-size:23px;font-weight:900">${perfect ? 'Всё верно!' : 'Урок пройден'}</h2>
     <div class="result-stats">
       <div class="rstat"><b style="color:#46a302">${Math.round(acc * 100)}%</b><span>Точность</span></div>
       <div class="rstat"><b style="color:#ff9600">${L.correct}/${L.totalQ}</b><span>Верно</span></div>
       <div class="rstat"><b style="color:#1cb0f6">❤️ ${state.hearts}</b><span>Сердец</span></div>
     </div>
-    ${state.hearts === 0 ? '<p style="font-weight:800;color:#c62828">Сердечки закончились — они восстановятся завтра (а учиться можно и без них, Курсич не строгий).</p>' : ''}
-    <button class="btn" id="to-path">К карте уроков</button>
+    <button class="btn" id="to-path">К урокам</button>
     <button class="btn ghost" id="retry" style="margin-top:12px">Пройти ещё раз</button>
   </div></div>`;
-  if (perfect || firstTime) confetti(perfect ? 90 : 50);
+  if (firstTime) confetti(perfect ? 80 : 45);
   notify('success'); checkAchievements();
   document.getElementById('to-path').onclick = () => { haptic(); exitLesson(); };
   document.getElementById('retry').onclick = () => { haptic(); startLesson(lesson.id); };
 }
 
-// старт
 render();
