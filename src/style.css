@@ -331,3 +331,16 @@ body.dark #app.in-lesson .lesson-head{background:#121613}
 .recap-item b{font-size:15px}
 
 input{-webkit-user-select:text;user-select:text}
+/* ── SVG-иконки вместо системных эмодзи ─────────────────────────── */
+.ic{vertical-align:-4px;flex:none}
+.stat .ic{vertical-align:-3px}
+.tab .ti{height:26px;display:flex;align-items:center}
+.tile-ic{width:58px;height:58px;border-radius:18px;background:#e5f7d0;color:#46a302;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.locked-ic{background:#eef2f5;color:#8fa0aa}
+.course-tile .pill,.cat-text .pill{display:inline-flex;align-items:center;gap:4px}
+.unit-banner .uicon{color:#fff;display:flex;align-items:center}
+.theory-visual{color:var(--green-d)}
+.ach .ae{color:#b45309}
+.phase-tag .ic{vertical-align:-2px}
+.hearts-live{color:var(--red);display:flex;align-items:center;gap:4px}
+.rstat .ic{vertical-align:-3px}

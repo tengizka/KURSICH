@@ -2,6 +2,7 @@ import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { mascotSVG, mascotFinancierSVG } from './mascot.js';
 import { UNIT_ART, CAT_ART } from './illustrations.js';
+import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 
 // ── Telegram ───────────────────────────────
 const tg = window.Telegram?.WebApp;
@@ -17,7 +18,8 @@ try {
   // Держать приложение развёрнутым
   tg?.onEvent?.('viewportChanged', (e) => { if (e?.isStateStable) { try { tg.expand(); } catch (err) {} } });
 } catch (e) {}
-try { tg?.requestFullscreen?.(); } catch (e) { /* старые версии Telegram — просто развёрнуто */ }
+// Режим Fullsize: развёрнуто на всю высоту, но без Fullscreen.
+try { tg?.exitFullscreen?.(); } catch (e) {}
 const tgUser = tg?.initDataUnsafe?.user || null;
 const tgName = tgUser?.first_name || '';
 const tgPhoto = tgUser?.photo_url || '';
@@ -88,7 +90,7 @@ function checkAchievements() {
   ACHIEVEMENTS.forEach((a) => {
     if (!state.seenAch.includes(a.id) && a.check(state)) {
       state.seenAch.push(a.id); save();
-      setTimeout(() => { toast(`${a.emoji} Достижение: ${a.title}`); notify('success'); }, 500);
+      setTimeout(() => { toast(`Достижение: ${a.title}`); notify('success'); }, 500);
     }
   });
 }
@@ -163,13 +165,13 @@ function finishOnboarding() { state.onboarded = true; save(); flow = 'app'; appT
 // ── Каркас приложения ───────────────────────────────
 function topbar() {
   return `<div class="topbar"><div class="logo">курсич</div>
-    <div class="stat"><span class="flame">🔥 <b>${state.streak}</b></span><span class="gem">⭐ <b>${state.xp}</b></span><span class="heart">❤️ <b>${state.hearts}</b></span></div></div>`;
+    <div class="stat"><span class="flame">${icon('flame',18)} <b>${state.streak}</b></span><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><span class="heart">${icon('heart',18)} <b>${state.hearts}</b></span></div></div>`;
 }
 function tabbar() {
   const act = (id) => (appTab === id || (id === 'profile' && (appTab === 'ach' || appTab === 'settings')) ? 'active' : '');
   return `<nav class="tabbar">
-    <button class="tab ${act('courses')}" data-tab="courses"><span class="ti">🎓</span>Курсы</button>
-    <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">👤</span>Профиль</button></nav>`;
+    <button class="tab ${act('courses')}" data-tab="courses"><span class="ti">${icon('book',24)}</span>Курсы</button>
+    <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">${icon('user',24)}</span>Профиль</button></nav>`;
 }
 function renderApp() {
   applyTheme(); app.classList.remove('in-lesson');
@@ -203,7 +205,7 @@ function catalogHtml() {
     </button>
     ${OTHER_CATS.map((c) => `<button class="cat-card small" data-locked-cat="${c.id}">
       <div class="cat-art small-art" style="background:${c.grad}">${CAT_ART[c.art]}</div>
-      <div class="cat-text"><h3>${c.title}</h3><p>${c.desc}</p><span class="pill soon">🔒 Скоро</span></div>
+      <div class="cat-text"><h3>${c.title}</h3><p>${c.desc}</p><span class="pill soon">${icon('lock',13)} Скоро</span></div>
       <div class="cat-chev">›</div></button>`).join('')}
   </div>`;
 }
@@ -217,12 +219,12 @@ function financeHtml() {
     </div>
     <div class="course-grid">
       <button class="course-tile open" id="open-fin">
-        <div class="te">${COURSE.emoji}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
+        <div class="te tile-ic">${icon(COURSE_ICON[COURSE.id],30)}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
         <span class="pill">${doneCount() ? `Пройдено ${doneCount()} из ${totalLessons}` : 'Начать'}</span>
       </button>
       ${finLocked.map((c, i) => `<button class="course-tile locked" data-locked="${c.id}">
-        <div class="te">${c.emoji}</div><h3>${c.title}</h3><p>${c.desc}</p>
-        <span class="pill soon">🔒 Скоро</span></button>`).join('')}
+        <div class="te tile-ic locked-ic">${icon(COURSE_ICON[c.id] || 'book',30)}</div><h3>${c.title}</h3><p>${c.desc}</p>
+        <span class="pill soon">${icon('lock',13)} Скоро</span></button>`).join('')}
     </div>
   </div>`;
 }
@@ -261,18 +263,18 @@ function pathHtml() {
       const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
       return `<div class="node-wrap" style="transform:translateX(${OFFSETS[li % OFFSETS.length]}px)">
         ${current ? '<div class="start-bubble">СТАРТ</div>' : ''}
-        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? '✓' : !unlocked ? '🔒' : l.icon}</button>
+        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? icon('check',30) : !unlocked ? icon('lock',25) : icon(LESSON_ICON[l.id] || 'book',29)}</button>
         <div class="node-label ${!unlocked ? 'locked' : ''}">${l.title}</div>
         <div class="mini-progress">+${l.xp} XP</div></div>`;
     }).join('');
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
-    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${u.icon}</div>
+    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${icon(UNIT_ICON[u.id] || 'book',32)}</div>
       <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
       <div class="path">${trail}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
   }).join('');
   return `<div class="screen" style="padding-top:10px">
     <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> Финансы</button>
-    <h2 class="st" style="margin-top:6px">${COURSE.emoji} ${COURSE.title}</h2>
+    <h2 class="st" style="margin-top:6px">${COURSE.title}</h2>
     <p class="sub">${doneCount()} из ${totalLessons} уроков · уровень ${level()}</p>
     <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (doneCount() / totalLessons) * 100)}%"></i></div>
     ${units}</div>`;
@@ -285,39 +287,39 @@ function profileHtml() {
     <div class="cardbox" style="display:flex;gap:14px;align-items:center;margin-top:14px">
       ${tgPhoto ? `<img class="tg-avatar" src="${esc(tgPhoto)}" alt="">` : `<div class="tg-initial">${esc((state.name || 'К')[0].toUpperCase())}</div>`}
       <div><div style="font-size:19px;font-weight:900">${esc(state.name) || 'Ученик'}</div>
-      <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ⭐ ${state.xp} XP</div>
-      <div style="font-weight:800;color:var(--muted);font-size:13px">🔥 ${state.streak} дн. · уроков: ${doneCount()}/${totalLessons}</div></div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ${state.xp} XP</div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px">${icon('flame',14)} ${state.streak} дн. · уроков: ${doneCount()}/${totalLessons}</div></div>
     </div>
     <div class="cardbox" style="padding:4px 16px">
-      <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf">🏆</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
-      <button class="menu-row" id="go-settings"><span class="mi" style="background:#eef2f5">⚙️</span>Настройки<span class="chev">›</span></button>
+      <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf;color:#b45309">${icon('trophy',22)}</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
+      <button class="menu-row" id="go-settings"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('sliders',22)}</span>Настройки<span class="chev">›</span></button>
     </div>
   </div>`;
 }
 function achHtml() {
   return `<div class="screen">
     <button class="menu-row" data-back-profile style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Профиль</button>
-    <h2 class="st">🏆 Достижения</h2>
+    <h2 class="st">Достижения</h2>
     <div class="cardbox" style="padding:4px 16px">
-    ${ACHIEVEMENTS.map((a) => { const on = a.check(state); return `<div class="ach ${on ? '' : 'off'}"><div class="ae">${a.emoji}</div><div><h4>${a.title}</h4><p>${a.desc}</p></div>${on ? '<div style="margin-left:auto;color:#46a302;font-weight:900">✓</div>' : ''}</div>`; }).join('')}
+    ${ACHIEVEMENTS.map((a) => { const on = a.check(state); return `<div class="ach ${on ? '' : 'off'}"><div class="ae">${icon(ACH_ICON[a.id] || 'star',26)}</div><div><h4>${a.title}</h4><p>${a.desc}</p></div>${on ? '<div style="margin-left:auto;color:#46a302;font-weight:900">✓</div>' : ''}</div>`; }).join('')}
     </div></div>`;
 }
 function settingsHtml() {
   return `<div class="screen">
     <button class="menu-row" data-back-profile style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Профиль</button>
-    <h2 class="st">⚙️ Настройки</h2>
+    <h2 class="st">Настройки</h2>
     <div class="cardbox" style="padding:6px 16px">
-      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#e5f7d0">👋</span>Имя
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#e5f7d0;color:#3f8f04">${icon('user',22)}</span>Имя
         <input class="name-input" id="set-name" style="margin-left:auto;width:46%;padding:9px 10px;font-size:15px;text-align:right" maxlength="24" value="${esc(state.name)}"></div>
-      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">🌙</span>Тёмная тема
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('moon',22)}</span>Тёмная тема
         <label class="switch"><input type="checkbox" id="set-dark" ${state.dark ? 'checked' : ''}><i></i></label></div>
-      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">🔔</span>Звуковые эффекты
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('bell',22)}</span>Звуковые эффекты
         <label class="switch"><input type="checkbox" id="set-sound" ${state.sound ? 'checked' : ''}><i></i></label></div>
     </div>
     <div class="cardbox" style="padding:6px 16px">
-      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">ℹ️</span>О приложении
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('info',22)}</span>О приложении
         <span style="margin-left:auto;font-weight:800;color:var(--muted);font-size:13px">курсич · версия 1.1</span></div>
-      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">📅</span>Материалы курсов
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('calendar',22)}</span>Материалы курсов
         <span style="margin-left:auto;font-weight:800;color:var(--muted);font-size:13px">актуальны на октябрь 2026</span></div>
     </div>
     <button class="btn ghost" id="redo-ob" style="margin-bottom:12px">Пройти знакомство заново</button>
@@ -387,20 +389,20 @@ function renderLesson() {
   let body = '';
   if (step.kind === 'theory') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'theory').length;
-    body = `<span class="phase-tag theory">📖 Сначала разберёмся · ${n} из ${L.theoryN}</span>
+    body = `<span class="phase-tag theory">${icon('book',14)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
       <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
         <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
-      <div class="theory-visual">${step.e}</div>
+      <div class="theory-visual">${icon(LESSON_ICON[L.lesson.id] || 'book',70)}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
-    body = `<span class="phase-tag">❓ Вопрос ${n} из ${L.totalQ}</span>
+    body = `<span class="phase-tag">${icon('help',14)} Вопрос ${n} из ${L.totalQ}</span>
       <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('think')}</div>
         <div class="bubble" style="font-size:17px"><b>${step.q}</b></div></div>
       <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
       <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
   } else { // recap
-    body = `<span class="phase-tag recap">🧠 Закрепим</span>
+    body = `<span class="phase-tag recap">${icon('target',14)} Закрепим</span>
       <h2 style="margin-top:14px">Главное из урока</h2>
       ${L.lesson.cards.map((c, i) => { const short = (c.b.split(/(?<=\.)\s/)[0] || c.b); return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${c.t}</b><p>${short}</p></div></div>`; }).join('')}
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
@@ -408,7 +410,7 @@ function renderLesson() {
   app.innerHTML = `<div style="max-width:480px;margin:0 auto">
     <div class="lesson-head"><button class="xclose" id="lx">✕</button>
       <div class="bar lbar"><i style="width:${progress}%;background:linear-gradient(90deg,#58cc02,#8ee000)"></i></div>
-      <div class="hearts-live">❤️ ${state.hearts}</div></div>
+      <div class="hearts-live">${icon('heart',19)} ${state.hearts}</div></div>
     <div class="lesson-body slide-in" style="padding-bottom:120px">${body}</div></div>`;
   document.getElementById('lx').onclick = () => { haptic(); exitLesson(); };
   const next = document.getElementById('next');
@@ -464,7 +466,7 @@ function finishLesson() {
     <div class="result-stats">
       <div class="rstat"><b style="color:#46a302">${Math.round(acc * 100)}%</b><span>Точность</span></div>
       <div class="rstat"><b style="color:#ff9600">${L.correct}/${L.totalQ}</b><span>Верно</span></div>
-      <div class="rstat"><b style="color:#1cb0f6">❤️ ${state.hearts}</b><span>Сердец</span></div>
+      <div class="rstat"><b style="color:#1cb0f6">${icon('heart',18)} ${state.hearts}</b><span>Сердец</span></div>
     </div>
     <button class="btn" id="to-path">К урокам</button>
     <button class="btn ghost" id="retry" style="margin-top:12px">Пройти ещё раз</button>
