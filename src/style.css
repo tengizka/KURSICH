@@ -8,7 +8,7 @@
 html,body{margin:0;padding:0}
 body{font-family:'Nunito',system-ui,sans-serif;background:#f3f7ee;color:var(--ink);overflow-x:hidden}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
-#app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;box-shadow:0 0 40px rgba(0,0,0,.06);padding-bottom:86px;background-color:#fdfffa;background-image:radial-gradient(#58cc0222 1.6px,transparent 1.7px),radial-gradient(#1cb0f622 1.6px,transparent 1.7px),linear-gradient(180deg,#fdfffa 0%,#f2f9ff 55%,#fdf6ec 100%);background-size:26px 26px,26px 26px,100% 100%;background-position:0 0,13px 13px,0 0}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;box-shadow:0 0 40px rgba(0,0,0,.06);padding-bottom:86px;background-color:#f6faef;background-image:radial-gradient(340px 220px at 12% 4%,rgba(88,204,2,.16),transparent 70%),radial-gradient(360px 240px at 92% 26%,rgba(28,176,246,.14),transparent 70%),radial-gradient(340px 240px at 16% 72%,rgba(255,200,0,.13),transparent 70%),radial-gradient(300px 220px at 88% 88%,rgba(206,130,255,.12),transparent 70%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M2 18 Q16 8 30 18 T58 18' fill='none' stroke='%2358cc02' stroke-opacity='.10' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='44' cy='42' r='3' fill='%231cb0f6' fill-opacity='.12'/%3E%3Cpath d='M8 44 l3 6 6-3-3-6Z' fill='%23ffc800' fill-opacity='.14'/%3E%3C/svg%3E");background-size:auto,auto,auto,auto,56px 56px}
 
 /* ── Top bar ─────────────────────────── */
 .topbar{position:sticky;top:0;z-index:40;background:#fff;border-bottom:2px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:12px}
@@ -285,7 +285,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .unit-art{width:60px;flex:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
 .unit-art svg{width:100%;height:auto;display:block}
 body.dark{--ink:#eef4ef;--muted:#9db0a2;--line:#2c362e;background:#0c0f0d}
-body.dark #app{background-color:#121613;background-image:radial-gradient(#58cc0230 1.6px,transparent 1.7px),radial-gradient(#1cb0f62b 1.6px,transparent 1.7px),linear-gradient(180deg,#121613 0%,#101820 60%,#181410 100%)}
+body.dark #app{background-color:#11150f;background-image:radial-gradient(340px 220px at 12% 4%,rgba(88,204,2,.13),transparent 70%),radial-gradient(360px 240px at 92% 26%,rgba(28,176,246,.11),transparent 70%),radial-gradient(340px 240px at 16% 72%,rgba(255,200,0,.09),transparent 70%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M2 18 Q16 8 30 18 T58 18' fill='none' stroke='%2358cc02' stroke-opacity='.13' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='44' cy='42' r='3' fill='%231cb0f6' fill-opacity='.15'/%3E%3C/svg%3E");background-size:auto,auto,auto,56px 56px}
 body.dark .topbar,body.dark .tabbar{background:#171d19;border-color:var(--line)}
 body.dark .cardbox,body.dark .course-tile,body.dark .cat-card,body.dark .opt,body.dark .bubble,body.dark .modal-card,body.dark .onboard,body.dark .recap-item{background:#1d251f;color:var(--ink);border-color:var(--line)}
 body.dark .onboard.splash{background:var(--green)}
@@ -297,3 +297,20 @@ body.dark .feedback{color:#263238}
 body.dark .course-tile.locked{color:#84948a}
 body.dark .node.locked{background:#2a332c!important;box-shadow:0 6px 0 #1c231e;color:#718276}
 body.dark .dots i{background:#33413a}
+
+/* ── Путь: аккуратный зигзаг ─────────────────────────── */
+.path{gap:0;padding:14px 0 10px;overflow:hidden}
+.node-wrap{height:138px;justify-content:flex-start;z-index:1}
+.node-label{margin-top:10px;max-width:132px}
+.mini-progress{margin-top:3px}
+.path-trail{width:340px}
+.path-art{left:50%;right:auto;top:42%;transform:translateX(-50%) rotate(-6deg);width:150px;opacity:.09}
+.path-emoji{font-size:25px;opacity:.20}
+.unit-banner{position:relative;z-index:2}
+/* фикс пути: анимация не должна ломать смещение узлов */
+.path{position:relative}
+.node-wrap{animation:none}
+.node-wrap .node{animation:fadeUp .4s ease both}
+.path-art{animation:artFloat 6s ease-in-out infinite}
+@keyframes artFloat{0%,100%{transform:translateX(-50%) rotate(-6deg) translateY(0)}50%{transform:translateX(-50%) rotate(-4deg) translateY(-10px)}}
+.node-wrap .node.current{animation:fadeUp .4s ease both,nodePulse 1.6s .45s ease-in-out infinite}

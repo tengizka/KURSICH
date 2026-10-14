@@ -235,15 +235,15 @@ function showLockedModal(course) {
 }
 
 // ── Путь курса ───────────────────────────────
-const OFFSETS = [0, 74, -58, 92, -84, 38, -70, 86, -42, 64];
+const OFFSETS = [0, 52, 84, 52, 0, -52, -84, -52]; // зигзаг как в Duolingo: влево-вправо
 const UNIT_DECOR = { u1: ['🧾', '💸'], u2: ['💳', '🧮'], u3: ['📄', '⏳'], u4: ['📊', '🪙'], u5: ['🧾', '🏠'], u6: ['📱', '🔐'] };
 function pathHtml() {
   let gi = -1;
   const units = COURSE.units.map((u) => {
-    const pts = u.lessons.map((l, li) => ({ x: 170 + OFFSETS[li % OFFSETS.length], y: 52 + li * 128 }));
-    const d = pts.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i-1].x} ${pts[i-1].y + 52}, ${p.x} ${p.y - 52}, ${p.x} ${p.y}`).join(' ');
-    const trail = `<svg class="path-trail" viewBox="0 0 340 ${pts.length * 128 + 30}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${u.color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="1 18" opacity=".45"/></svg>`;
-    const decor = (UNIT_DECOR[u.id] || []).map((e, i) => `<span class="path-emoji" style="top:${120 + i * 210}px;${i % 2 ? 'right:18px' : 'left:18px'};animation-delay:${i * .7}s">${e}</span>`).join('');
+    const pts = u.lessons.map((l, li) => ({ x: 170 + OFFSETS[li % OFFSETS.length], y: 36 + li * 138 }));
+    const d = pts.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i-1].x} ${pts[i-1].y + 56}, ${p.x} ${p.y - 56}, ${p.x} ${p.y}`).join(' ');
+    const trail = `<svg class="path-trail" viewBox="0 0 340 ${pts.length * 138 + 20}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${u.color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="0.1 17" opacity=".5"/></svg>`;
+    const decor = (UNIT_DECOR[u.id] || []).map((e, i) => `<span class="path-emoji" style="top:${150 + i * 240}px;${i % 2 ? 'right:10px' : 'left:10px'};animation-delay:${i * .7}s">${e}</span>`).join('');
     const nodes = u.lessons.map((l, li) => {
       gi++;
       const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
@@ -254,7 +254,7 @@ function pathHtml() {
         <div class="mini-progress">+${l.xp} XP</div></div>`;
     }).join('');
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
-    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon unit-art">${UNIT_ART[u.id]}</div>
+    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${u.icon}</div>
       <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
       <div class="path">${trail}${decor}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
   }).join('');
