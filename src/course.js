@@ -337,11 +337,11 @@ export const COURSE = {
 };
 
 export const OTHER_COURSES = [
-  { id: 'invest-pro', title: 'Инвестиции PRO', desc: 'Портфели, ребалансировка, налоги инвестора', emoji: '🚀', level: 'Средний', soon: true },
-  { id: 'career', title: 'Карьера и доход', desc: 'Самозанятость, ИП, переговоры о зарплате', emoji: '💼', level: 'Старт', soon: true },
-  { id: 'flat', title: 'Квартирный вопрос', desc: 'Ипотека-2026, первоначальный взнос, вычеты', emoji: '🏠', level: 'Средний', soon: true },
-  { id: 'crypto', title: 'Крипта без FOMO', desc: 'Что легально в РФ, риски и налоги', emoji: '₿', level: 'Осторожно', soon: true },
-  { id: 'business', title: 'Своё дело', desc: 'От идеи до первой прибыли: режимы и отчётность', emoji: '🧁', level: 'Старт', soon: true },
+  { cat: 'finance', id: 'invest-pro', title: 'Инвестиции PRO', desc: 'Портфели, ребалансировка, налоги инвестора', emoji: '🚀', level: 'Средний', soon: true },
+  { cat: 'career', id: 'career', title: 'Карьера и доход', desc: 'Самозанятость, ИП, переговоры о зарплате', emoji: '💼', level: 'Старт', soon: true },
+  { cat: 'finance', id: 'flat', title: 'Квартирный вопрос', desc: 'Ипотека-2026, первоначальный взнос, вычеты', emoji: '🏠', level: 'Средний', soon: true },
+  { cat: 'finance', id: 'crypto', title: 'Крипта без FOMO', desc: 'Что легально в РФ, риски и налоги', emoji: '₿', level: 'Осторожно', soon: true },
+  { cat: 'career', id: 'business', title: 'Своё дело', desc: 'От идеи до первой прибыли: режимы и отчётность', emoji: '🧁', level: 'Старт', soon: true },
 ];
 
 export const ACHIEVEMENTS = [

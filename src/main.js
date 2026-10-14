@@ -1,6 +1,7 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
-import { mascotSVG } from './mascot.js';
+import { mascotSVG, mascotFinancierSVG } from './mascot.js';
+import { UNIT_ART, CAT_ART } from './illustrations.js';
 
 // ── Telegram ───────────────────────────────
 const tg = window.Telegram?.WebApp;
@@ -14,7 +15,7 @@ const notify = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } cat
 // ── Состояние ───────────────────────────────
 const KEY = 'kursich_state_v2';
 const todayStr = () => new Date().toISOString().slice(0, 10);
-const defaultState = () => ({ xp: 0, hearts: 5, streak: 0, bestStreak: 0, lastDay: null, completed: {}, seenAch: [], name: '', onboarded: false, sound: false });
+const defaultState = () => ({ xp: 0, hearts: 5, streak: 0, bestStreak: 0, lastDay: null, completed: {}, seenAch: [], name: '', onboarded: false, sound: false, dark: false });
 let state = (() => {
   try {
     const cur = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -85,8 +86,12 @@ let flow = state.onboarded ? 'app' : 'splash'; // splash → name → tutorial �
 let tutIdx = 0;
 let appTab = 'courses'; // courses | profile | ach | settings
 let inPath = false;
+let catView = 'catalog'; // catalog | finance
+let scrollCurrent = false;
 
+function applyTheme() { document.body.classList.toggle('dark', !!state.dark); }
 function render() {
+  applyTheme();
   document.querySelectorAll('.feedback,.modal-back').forEach((e) => e.remove());
   if (flow !== 'app') return renderOnboarding();
   renderApp();
@@ -154,8 +159,9 @@ function tabbar() {
     <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">👤</span>Профиль</button></nav>`;
 }
 function renderApp() {
+  applyTheme();
   let html = '';
-  if (appTab === 'courses') html = inPath ? pathHtml() : catalogHtml();
+  if (appTab === 'courses') html = inPath ? pathHtml() : (catView === 'finance' ? financeHtml() : catalogHtml());
   else if (appTab === 'profile') html = profileHtml();
   else if (appTab === 'ach') html = achHtml();
   else if (appTab === 'settings') html = settingsHtml();
@@ -163,27 +169,64 @@ function renderApp() {
   bindApp();
 }
 
-// ── Каталог курсов ───────────────────────────────
+// ── Каталог: категории и курсы ───────────────────────────────
 const TILE_COLORS = ['#1cb0f6', '#ce82ff', '#ff9600', '#ff4b4b', '#ff86d0'];
+const OTHER_CATS = [
+  { id: 'career', title: 'Карьера', desc: 'Работа, доход, своё дело', art: 'career', grad: 'linear-gradient(135deg,#ffcf5c,#ff9600)' },
+  { id: 'tech', title: 'Технологии', desc: 'Компьютеры и интернет', art: 'tech', grad: 'linear-gradient(135deg,#56ccf2,#1cb0f6)' },
+  { id: 'lang', title: 'Языки', desc: 'Английский и другие', art: 'lang', grad: 'linear-gradient(135deg,#7ed3fc,#38bdf8)' },
+  { id: 'art', title: 'Творчество', desc: 'Рисование, музыка, хобби', art: 'art', grad: 'linear-gradient(135deg,#e0aaff,#ce82ff)' },
+];
 function catalogHtml() {
   return `<div class="screen">
+    <div class="bg-decor"><span style="top:70px;right:22px">✦</span><span style="top:210px;left:14px">✦</span><span style="top:430px;right:36px">✦</span></div>
     <div class="greet-row"><div class="gm">${mascotSVG('idle')}</div>
-      <div><h2>Привет${state.name ? ', ' + esc(state.name) : ''}!</h2><p>Выбери курс — и поехали.</p></div></div>
+      <div><h2>Привет${state.name ? ', ' + esc(state.name) : ''}!</h2><p>Что учим сегодня?</p></div></div>
+    <button class="cat-card" id="open-fin-cat">
+      <div class="cat-art">${mascotFinancierSVG()}</div>
+      <div class="cat-text"><h3>Финансы</h3><p>Деньги, вклады, кредиты, инвестиции</p>
+      <span class="pill cat-pill">${doneCount() ? `Идёт курс · ${doneCount()}/${totalLessons}` : 'Есть открытый курс'}</span></div>
+      <div class="cat-chev">›</div>
+    </button>
+    ${OTHER_CATS.map((c) => `<button class="cat-card small" data-locked-cat="${c.id}">
+      <div class="cat-art small-art" style="background:${c.grad}">${CAT_ART[c.art]}</div>
+      <div class="cat-text"><h3>${c.title}</h3><p>${c.desc}</p><span class="pill soon">🔒 Скоро</span></div>
+      <div class="cat-chev">›</div></button>`).join('')}
+  </div>`;
+}
+function financeHtml() {
+  const finLocked = OTHER_COURSES.filter((c) => c.cat === 'finance');
+  return `<div class="screen">
+    <button class="menu-row" id="back-catalog" style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Все темы</button>
+    <div class="cat-card hero-cat" style="cursor:default">
+      <div class="cat-art">${mascotFinancierSVG()}</div>
+      <div class="cat-text"><h3>Финансы</h3><p>Курсич в галстуке — значит, говорим о деньгах.</p></div>
+    </div>
     <div class="course-grid">
       <button class="course-tile open" id="open-fin">
         <div class="te">${COURSE.emoji}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
         <span class="pill">${doneCount() ? `Пройдено ${doneCount()} из ${totalLessons}` : 'Начать'}</span>
       </button>
-      ${OTHER_COURSES.map((c, i) => `<button class="course-tile locked" data-locked="${c.id}">
+      ${finLocked.map((c, i) => `<button class="course-tile locked" data-locked="${c.id}">
         <div class="te">${c.emoji}</div><h3>${c.title}</h3><p>${c.desc}</p>
         <span class="pill soon">🔒 Скоро</span></button>`).join('')}
     </div>
   </div>`;
 }
+function showLockedCatModal(cat) {
+  const back = document.createElement('div'); back.className = 'modal-back';
+  back.innerHTML = `<div class="modal-card"><div class="mm">${mascotSVG('sleepy')}</div>
+    <h3>В разработке</h3><p>Тема «${esc(cat.title)}» ещё готовится. Сейчас открыты только финансы.</p>
+    <button class="btn" id="modal-ok">Понятно</button></div>`;
+  document.body.appendChild(back);
+  const close = () => back.remove();
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
+  document.getElementById('modal-ok').onclick = () => { haptic(); close(); };
+}
 function showLockedModal(course) {
   const back = document.createElement('div'); back.className = 'modal-back';
   back.innerHTML = `<div class="modal-card"><div class="mm">${mascotSVG('sleepy')}</div>
-    <h3>В разработке</h3><p>Курс «${esc(course.title)}» ещё пишется. Пока доступен курс финансовой грамотности.</p>
+    <h3>В разработке</h3><p>Курс «${esc(course.title)}» ещё пишется.</p>
     <button class="btn" id="modal-ok">Понятно</button></div>`;
   document.body.appendChild(back);
   const close = () => back.remove();
@@ -192,10 +235,15 @@ function showLockedModal(course) {
 }
 
 // ── Путь курса ───────────────────────────────
-const OFFSETS = [0, 48, 84, 48, 0, -48, -84, -48];
+const OFFSETS = [0, 74, -58, 92, -84, 38, -70, 86, -42, 64];
+const UNIT_DECOR = { u1: ['🧾', '💸'], u2: ['💳', '🧮'], u3: ['📄', '⏳'], u4: ['📊', '🪙'], u5: ['🧾', '🏠'], u6: ['📱', '🔐'] };
 function pathHtml() {
   let gi = -1;
   const units = COURSE.units.map((u) => {
+    const pts = u.lessons.map((l, li) => ({ x: 170 + OFFSETS[li % OFFSETS.length], y: 52 + li * 128 }));
+    const d = pts.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i-1].x} ${pts[i-1].y + 52}, ${p.x} ${p.y - 52}, ${p.x} ${p.y}`).join(' ');
+    const trail = `<svg class="path-trail" viewBox="0 0 340 ${pts.length * 128 + 30}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${u.color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="1 18" opacity=".45"/></svg>`;
+    const decor = (UNIT_DECOR[u.id] || []).map((e, i) => `<span class="path-emoji" style="top:${120 + i * 210}px;${i % 2 ? 'right:18px' : 'left:18px'};animation-delay:${i * .7}s">${e}</span>`).join('');
     const nodes = u.lessons.map((l, li) => {
       gi++;
       const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
@@ -206,12 +254,12 @@ function pathHtml() {
         <div class="mini-progress">+${l.xp} XP</div></div>`;
     }).join('');
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
-    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${u.icon}</div>
+    return `<div class="unit-banner" style="background:${u.color}"><div class="uicon unit-art">${UNIT_ART[u.id]}</div>
       <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
-      <div class="path">${nodes}</div>`;
+      <div class="path">${trail}${decor}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
   }).join('');
   return `<div class="screen" style="padding-top:10px">
-    <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> Все курсы</button>
+    <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> Финансы</button>
     <h2 class="st" style="margin-top:6px">${COURSE.emoji} ${COURSE.title}</h2>
     <p class="sub">${doneCount()} из ${totalLessons} уроков · уровень ${level()}</p>
     <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (doneCount() / totalLessons) * 100)}%"></i></div>
@@ -249,6 +297,8 @@ function settingsHtml() {
     <div class="cardbox" style="padding:6px 16px">
       <div class="menu-row" style="cursor:default"><span class="mi" style="background:#e5f7d0">👋</span>Имя
         <input class="name-input" id="set-name" style="margin-left:auto;width:46%;padding:9px 10px;font-size:15px;text-align:right" maxlength="24" value="${esc(state.name)}"></div>
+      <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">🌙</span>Тёмная тема
+        <label class="switch"><input type="checkbox" id="set-dark" ${state.dark ? 'checked' : ''}><i></i></label></div>
       <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">🔔</span>Звуковые эффекты
         <label class="switch"><input type="checkbox" id="set-sound" ${state.sound ? 'checked' : ''}><i></i></label></div>
     </div>
@@ -265,17 +315,29 @@ function settingsHtml() {
 
 function bindApp() {
   app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); window.scrollTo(0, 0); });
+  const openFinCat = document.getElementById('open-fin-cat');
+  if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); window.scrollTo(0, 0); };
+  app.querySelectorAll('[data-locked-cat]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_CATS.find((x) => x.id === b.dataset.lockedCat); if (c) showLockedCatModal(c); });
   const openFin = document.getElementById('open-fin');
-  if (openFin) openFin.onclick = () => { inPath = true; haptic('medium'); renderApp(); window.scrollTo(0, 0); };
+  if (openFin) openFin.onclick = () => { inPath = true; scrollCurrent = true; haptic('medium'); renderApp(); };
   app.querySelectorAll('[data-locked]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_COURSES.find((x) => x.id === b.dataset.locked); if (c) showLockedModal(c); });
-  const back = document.getElementById('back-catalog');
-  if (back) back.onclick = () => { inPath = false; haptic(); renderApp(); window.scrollTo(0, 0); };
+  const backs = app.querySelectorAll('#back-catalog');
+  backs.forEach((back) => back.onclick = () => { if (inPath) { inPath = false; } else { catView = 'catalog'; } haptic(); renderApp(); window.scrollTo(0, 0); });
+  if (inPath && scrollCurrent) {
+    scrollCurrent = false;
+    requestAnimationFrame(() => setTimeout(() => {
+      const cur = app.querySelector('.node.current') || app.querySelector('.node:not(.locked):last-of-type');
+      if (cur) cur.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 60));
+  }
   app.querySelectorAll('[data-lesson]').forEach((b) => b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); });
   const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); window.scrollTo(0, 0); };
   const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); window.scrollTo(0, 0); };
   app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); window.scrollTo(0, 0); });
   const nameIn = document.getElementById('set-name');
   if (nameIn) nameIn.addEventListener('change', () => { state.name = nameIn.value.trim(); save(); toast('Имя сохранено'); });
+  const darkIn = document.getElementById('set-dark');
+  if (darkIn) darkIn.addEventListener('change', () => { state.dark = darkIn.checked; save(); applyTheme(); });
   const soundIn = document.getElementById('set-sound');
   if (soundIn) soundIn.addEventListener('change', () => { state.sound = soundIn.checked; save(); if (state.sound) beep(true); });
   const redo = document.getElementById('redo-ob');
@@ -283,7 +345,7 @@ function bindApp() {
   const reset = document.getElementById('reset-all');
   if (reset) reset.onclick = () => {
     if (confirm('Сбросить прогресс, XP и достижения?')) {
-      const keep = { name: state.name, onboarded: true, sound: state.sound };
+      const keep = { name: state.name, onboarded: true, sound: state.sound, dark: state.dark };
       state = { ...defaultState(), ...keep, lastDay: todayStr(), streak: 1, bestStreak: 1 };
       save(); appTab = 'courses'; inPath = false; renderApp(); toast('Прогресс сброшен');
     }
@@ -304,7 +366,7 @@ function startLesson(lessonId) {
   try { tg?.BackButton?.show(); tg.BackButton.onClick(exitLesson); } catch (e) {}
   renderLesson();
 }
-function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; render(); window.scrollTo(0, 0); }
+function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; scrollCurrent = true; render(); }
 
 function renderLesson() {
   const step = L.steps[L.idx];
@@ -358,6 +420,7 @@ function renderLesson() {
   }
 }
 function checkAnswer() {
+  const cta = app.querySelector('.lesson-body .sticky-cta'); if (cta) cta.remove();
   const step = L.steps[L.idx];
   const ok = step.type === 'num' ? Number(L.selected) === Number(step.answer) : L.selected === step.correct;
   L.checked = true;
