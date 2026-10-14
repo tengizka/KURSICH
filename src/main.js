@@ -5,7 +5,9 @@ import { mascotSVG } from './mascot.js';
 // ── Telegram ───────────────────────────────
 const tg = window.Telegram?.WebApp;
 try { tg?.ready(); tg?.expand(); tg?.setHeaderColor?.('#ffffff'); tg?.setBackgroundColor?.('#ffffff'); } catch (e) {}
-const tgName = tg?.initDataUnsafe?.user?.first_name || '';
+const tgUser = tg?.initDataUnsafe?.user || null;
+const tgName = tgUser?.first_name || '';
+const tgPhoto = tgUser?.photo_url || '';
 const haptic = (t = 'light') => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (e) {} };
 const notify = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (e) {} };
 
@@ -221,7 +223,7 @@ function profileHtml() {
   const got = ACHIEVEMENTS.filter((a) => a.check(state)).length;
   return `<div class="screen">
     <div class="cardbox" style="display:flex;gap:14px;align-items:center;margin-top:14px">
-      <div style="width:88px;flex:none">${mascotSVG('idle')}</div>
+      ${tgPhoto ? `<img class="tg-avatar" src="${esc(tgPhoto)}" alt="">` : `<div class="tg-initial">${esc((state.name || 'К')[0].toUpperCase())}</div>`}
       <div><div style="font-size:19px;font-weight:900">${esc(state.name) || 'Ученик'}</div>
       <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ⭐ ${state.xp} XP</div>
       <div style="font-weight:800;color:var(--muted);font-size:13px">🔥 ${state.streak} дн. · уроков: ${doneCount()}/${totalLessons}</div></div>
@@ -249,14 +251,12 @@ function settingsHtml() {
         <input class="name-input" id="set-name" style="margin-left:auto;width:46%;padding:9px 10px;font-size:15px;text-align:right" maxlength="24" value="${esc(state.name)}"></div>
       <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">🔔</span>Звуковые эффекты
         <label class="switch"><input type="checkbox" id="set-sound" ${state.sound ? 'checked' : ''}><i></i></label></div>
-      <p class="set-note" style="padding:0 4px 12px">Музыки в приложении нет. Если звук выключен, остаются только вибрация в Telegram и анимации.</p>
     </div>
     <div class="cardbox" style="padding:6px 16px">
       <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">ℹ️</span>О приложении
         <span style="margin-left:auto;font-weight:800;color:var(--muted);font-size:13px">курсич · версия 1.1</span></div>
       <div class="menu-row" style="cursor:default"><span class="mi" style="background:#eef2f5">📅</span>Материалы курсов
         <span style="margin-left:auto;font-weight:800;color:var(--muted);font-size:13px">актуальны на октябрь 2026</span></div>
-      <p class="set-note" style="padding:0 4px 12px">Приложение учебное. Перед важными решениями о деньгах проверяй цифры в своём банке и на официальных сайтах.</p>
     </div>
     <button class="btn ghost" id="redo-ob" style="margin-bottom:12px">Пройти знакомство заново</button>
     <button class="btn ghost" id="reset-all" style="color:#ff4b4b">Сбросить прогресс</button>
@@ -297,7 +297,6 @@ function startLesson(lessonId) {
   if (!lesson) return;
   const steps = [
     ...lesson.cards.map((c) => ({ kind: 'theory', ...c })),
-    { kind: 'intro' },
     ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
     { kind: 'recap' },
   ];
@@ -318,11 +317,6 @@ function renderLesson() {
         <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
       <div class="theory-visual">${step.e}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
-  } else if (step.kind === 'intro') {
-    body = `<span class="phase-tag">❓ А теперь проверим</span>
-      <div class="mascot-row"><div class="mwrap">${mascotSVG('think')}</div>
-        <div class="bubble"><b>Вопросы по только что пройденному.</b><br>Ошибёшься — объясню ещё раз, ничего страшного.</div></div>
-      <div class="sticky-cta"><button class="btn" id="next">К вопросам</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
     body = `<span class="phase-tag">❓ Вопрос ${n} из ${L.totalQ}</span>
@@ -336,7 +330,7 @@ function renderLesson() {
     body = `<span class="phase-tag recap">🧠 Закрепим</span>
       <h2 style="margin-top:14px">Главное из урока</h2>
       ${L.lesson.cards.map((c, i) => `<div class="recap-item"><span class="rn">${i + 1}</span><span>${c.t}</span></div>`).join('')}
-      <p style="font-weight:800;color:var(--muted);font-size:14px">Верных ответов: ${L.correct} из ${L.totalQ}. Это и есть закрепление — ты только что сам всё вспомнил.</p>
+      <p style="font-weight:800;color:var(--muted);font-size:14px">Верных ответов: ${L.correct} из ${L.totalQ}</p>
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
   }
   app.innerHTML = `<div style="max-width:480px;margin:0 auto">

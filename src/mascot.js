@@ -1,6 +1,4 @@
-// Курсич — SVG-персонаж. Чёрные кудри, круглые очки.
-// Глаза моргают (CSS .m-blink), голова слегка покачивается,
-// в обычной позе руки опущены; машет только в эмоции celebrate.
+// Курсич — только голова. Чёрные кудри, круглые очки, глаза моргают.
 
 const OPEN_EYES = `
   <g class="m-blink">
@@ -63,38 +61,10 @@ const FACES = {
   },
 };
 
-// Руки: обычно опущены вдоль тела. celebrate — машет одной рукой.
-const ARMS = {
-  normal: (c) => `
-    <path d="M60 172 Q44 184 42 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <path d="M160 172 Q176 184 178 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <circle cx="42" cy="204" r="7.5" fill="#ffd3a6"/><circle cx="178" cy="204" r="7.5" fill="#ffd3a6"/>`,
-  celebrate: (c) => `
-    <path d="M60 172 Q44 184 42 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <circle cx="42" cy="204" r="7.5" fill="#ffd3a6"/>
-    <g class="m-wave"><path d="M160 170 Q182 156 188 132" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/><circle cx="189" cy="129" r="7.5" fill="#ffd3a6"/></g>`,
-  think: (c) => `
-    <path d="M60 172 Q44 184 42 202" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <circle cx="42" cy="204" r="7.5" fill="#ffd3a6"/>
-    <path d="M160 172 Q178 168 168 148" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <circle cx="166" cy="145" r="7.5" fill="#ffd3a6"/>`,
-};
-
 export function mascotSVG(emotion = 'idle', extraClass = '') {
   const f = FACES[emotion] || FACES.idle;
-  const armsFn = emotion === 'celebrate' ? ARMS.celebrate : emotion === 'think' ? ARMS.think : ARMS.normal;
-  const hoodie = emotion === 'sleepy' ? '#6366f1' : '#58cc02';
-  const dark = emotion === 'sleepy' ? '#4f46e5' : '#46a302';
   return `
-  <svg class="mascot-svg ${extraClass}" viewBox="0 0 220 222" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич">
-    <ellipse cx="110" cy="212" rx="58" ry="7" fill="#000" opacity="0.07"/>
-    <g class="m-breathe">
-      <path d="M60 220 Q58 164 110 164 Q162 164 160 220 Z" fill="${hoodie}"/>
-      <path d="M88 196 h44 v18 a6 6 0 0 1 -6 6 h-32 a6 6 0 0 1 -6 -6 Z" fill="${dark}" opacity=".5"/>
-      <path d="M90 166 Q110 179 130 166" stroke="${dark}" stroke-width="5" fill="none" stroke-linecap="round"/>
-      <path d="M101 168 v10 M119 168 v10" stroke="${dark}" stroke-width="4" stroke-linecap="round"/>
-      ${armsFn(dark)}
-    </g>
+  <svg class="mascot-svg ${extraClass}" viewBox="0 22 220 142" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич">
     <g class="m-head">
       <circle cx="57" cy="107" r="9.5" fill="#ffd3a6"/><circle cx="163" cy="107" r="9.5" fill="#ffd3a6"/>
       <ellipse cx="110" cy="105" rx="53" ry="49" fill="#ffd3a6"/>
