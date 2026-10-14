@@ -1,7 +1,7 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { mascotSVG, mascotFinancierSVG } from './mascot.js';
-import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART } from './illustrations.js';
+import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 
 // ── Telegram ───────────────────────────────
@@ -383,7 +383,7 @@ function startLesson(lessonId) {
   const lesson = allLessons.find((l) => l.id === lessonId);
   if (!lesson) return;
   const steps = [
-    ...lesson.cards.map((c) => ({ kind: 'theory', ...c })),
+    ...lesson.cards.map((c, ci) => ({ kind: 'theory', ci, ...c })),
     ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
     { kind: 'recap' },
   ];
@@ -403,7 +403,7 @@ function renderLesson() {
     body = `<span class="phase-tag theory">${icon('book',14)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
       <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
         <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
-      <div class="theory-visual">${LESSON_ART[L.lesson.id] || ''}</div>
+      <div class="theory-visual">${(step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || ''}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
