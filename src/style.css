@@ -344,3 +344,10 @@ input{-webkit-user-select:text;user-select:text}
 .phase-tag .ic{vertical-align:-2px}
 .hearts-live{color:var(--red);display:flex;align-items:center;gap:4px}
 .rstat .ic{vertical-align:-3px}
+/* Бесконечные сердечки и цветные иллюстрации уроков */
+.stat-btn{background:none;color:var(--red);font:inherit;display:flex;align-items:center;gap:3px;padding:0}
+.hearts-live{background:none;font:inherit;display:flex;align-items:center;gap:4px}
+.node-art{width:45px;height:45px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:5px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.node-art svg,.tile-art svg,.theory-visual svg{width:100%;height:100%;display:block}
+.tile-art{width:60px;height:60px;margin-bottom:10px}
+.theory-visual{width:124px;height:124px;margin:14px auto 4px;animation:bob 2.6s ease-in-out infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.12))}

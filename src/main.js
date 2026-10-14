@@ -1,7 +1,7 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { mascotSVG, mascotFinancierSVG } from './mascot.js';
-import { UNIT_ART, CAT_ART } from './illustrations.js';
+import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 
 // ── Telegram ───────────────────────────────
@@ -165,7 +165,7 @@ function finishOnboarding() { state.onboarded = true; save(); flow = 'app'; appT
 // ── Каркас приложения ───────────────────────────────
 function topbar() {
   return `<div class="topbar"><div class="logo">курсич</div>
-    <div class="stat"><span class="flame">${icon('flame',18)} <b>${state.streak}</b></span><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><span class="heart">${icon('heart',18)} <b>${state.hearts}</b></span></div></div>`;
+    <div class="stat"><span class="flame">${icon('flame',18)} <b>${state.streak}</b></span><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><button class="heart stat-btn" data-hearts>${icon('heart',18)} <b>∞</b></button></div></div>`;
 }
 function tabbar() {
   const act = (id) => (appTab === id || (id === 'profile' && (appTab === 'ach' || appTab === 'settings')) ? 'active' : '');
@@ -219,19 +219,29 @@ function financeHtml() {
     </div>
     <div class="course-grid">
       <button class="course-tile open" id="open-fin">
-        <div class="te tile-ic">${icon(COURSE_ICON[COURSE.id],30)}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
+        <div class="te tile-art">${COURSE_ART[COURSE.id] || ''}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
         <span class="pill">${doneCount() ? `Пройдено ${doneCount()} из ${totalLessons}` : 'Начать'}</span>
       </button>
       ${finLocked.map((c, i) => `<button class="course-tile locked" data-locked="${c.id}">
-        <div class="te tile-ic locked-ic">${icon(COURSE_ICON[c.id] || 'book',30)}</div><h3>${c.title}</h3><p>${c.desc}</p>
+        <div class="te tile-art">${COURSE_ART[c.id] || ''}</div><h3>${c.title}</h3><p>${c.desc}</p>
         <span class="pill soon">${icon('lock',13)} Скоро</span></button>`).join('')}
     </div>
   </div>`;
 }
+function showHeartsModal() {
+  const back = document.createElement('div'); back.className = 'modal-back';
+  back.innerHTML = `<div class="modal-card"><div class="mm">${mascotSVG('happy')}</div>
+    <h3>Учись спокойно</h3><p>Мы хотим, чтобы ты спокойно учился новому. Ошибки — часть учёбы, поэтому сердечки у тебя не заканчиваются.</p>
+    <button class="btn" id="modal-ok">Хорошо</button></div>`;
+  document.body.appendChild(back);
+  const close = () => back.remove();
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
+  document.getElementById('modal-ok').onclick = () => { haptic(); close(); };
+}
 function showLockedCatModal(cat) {
   const back = document.createElement('div'); back.className = 'modal-back';
   back.innerHTML = `<div class="modal-card"><div class="mm">${mascotSVG('sleepy')}</div>
-    <h3>В разработке</h3><p>Тема «${esc(cat.title)}» ещё готовится. Сейчас открыты только финансы.</p>
+    <h3>В разработке</h3><p>Тема «${esc(cat.title)}» ещё готовится.</p>
     <button class="btn" id="modal-ok">Понятно</button></div>`;
   document.body.appendChild(back);
   const close = () => back.remove();
@@ -263,7 +273,7 @@ function pathHtml() {
       const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
       return `<div class="node-wrap" style="transform:translateX(${OFFSETS[li % OFFSETS.length]}px)">
         ${current ? '<div class="start-bubble">СТАРТ</div>' : ''}
-        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? icon('check',30) : !unlocked ? icon('lock',25) : icon(LESSON_ICON[l.id] || 'book',29)}</button>
+        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? icon('check',30) : !unlocked ? icon('lock',25) : `<span class="node-art">${LESSON_ART[l.id] || ''}</span>`}</button>
         <div class="node-label ${!unlocked ? 'locked' : ''}">${l.title}</div>
         <div class="mini-progress">+${l.xp} XP</div></div>`;
     }).join('');
@@ -328,6 +338,7 @@ function settingsHtml() {
 }
 
 function bindApp() {
+  app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
   app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); app.scrollTo(0, 0); });
   const openFinCat = document.getElementById('open-fin-cat');
   if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); app.scrollTo(0, 0); };
@@ -392,7 +403,7 @@ function renderLesson() {
     body = `<span class="phase-tag theory">${icon('book',14)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
       <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
         <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
-      <div class="theory-visual">${icon(LESSON_ICON[L.lesson.id] || 'book',70)}</div>
+      <div class="theory-visual">${LESSON_ART[L.lesson.id] || ''}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
@@ -410,9 +421,10 @@ function renderLesson() {
   app.innerHTML = `<div style="max-width:480px;margin:0 auto">
     <div class="lesson-head"><button class="xclose" id="lx">✕</button>
       <div class="bar lbar"><i style="width:${progress}%;background:linear-gradient(90deg,#58cc02,#8ee000)"></i></div>
-      <div class="hearts-live">${icon('heart',19)} ${state.hearts}</div></div>
+      <button class="hearts-live" data-hearts>${icon('heart',19)} ∞</button></div>
     <div class="lesson-body slide-in" style="padding-bottom:120px">${body}</div></div>`;
   document.getElementById('lx').onclick = () => { haptic(); exitLesson(); };
+  app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
   const next = document.getElementById('next');
   if (next) next.onclick = () => { haptic(); advance(); };
   if (step.kind === 'quiz') {
@@ -431,7 +443,7 @@ function checkAnswer() {
   const step = L.steps[L.idx];
   const ok = L.selected === step.correct;
   L.checked = true;
-  if (ok) { L.correct++; notify('success'); beep(true); } else { state.hearts = Math.max(0, state.hearts - 1); save(); notify('error'); haptic('heavy'); beep(false); }
+  if (ok) { L.correct++; notify('success'); beep(true); } else { notify('error'); haptic('heavy'); beep(false); }
   app.querySelectorAll('[data-opt]').forEach((b) => {
     b.disabled = true; const i = Number(b.dataset.opt);
     if (i === step.correct) b.classList.add('right'); else if (i === L.selected) b.classList.add('wrong');
@@ -466,7 +478,7 @@ function finishLesson() {
     <div class="result-stats">
       <div class="rstat"><b style="color:#46a302">${Math.round(acc * 100)}%</b><span>Точность</span></div>
       <div class="rstat"><b style="color:#ff9600">${L.correct}/${L.totalQ}</b><span>Верно</span></div>
-      <div class="rstat"><b style="color:#1cb0f6">${icon('heart',18)} ${state.hearts}</b><span>Сердец</span></div>
+      <div class="rstat"><b style="color:#1cb0f6">${icon('heart',18)} ∞</b><span>Сердец</span></div>
     </div>
     <button class="btn" id="to-path">К урокам</button>
     <button class="btn ghost" id="retry" style="margin-top:12px">Пройти ещё раз</button>
