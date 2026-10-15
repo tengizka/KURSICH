@@ -392,3 +392,6 @@ body.dark .cardbox,body.dark .course-tile,body.dark .cat-card,body.dark .recap-i
 body.dark .opt{box-shadow:0 4px 0 #11160f,inset 0 2px 0 rgba(255,255,255,.06)}
 body.dark .bubble{box-shadow:0 4px 0 rgba(0,0,0,.25)}
 body.dark .node{box-shadow:inset 0 -7px 0 rgba(0,0,0,.25),inset 0 5px 0 rgba(255,255,255,.18),0 7px 0 var(--nd),0 12px 18px rgba(0,0,0,.3)}
+/* Курсич — без объёмной тени, иллюстрации — с объёмом */
+.mascot-svg{filter:none}
+.node-art svg,.tile-art svg,.theory-visual svg,.path-art svg,.unit-art svg,.small-art svg{filter:drop-shadow(0 3px 0 rgba(30,50,30,.16))}

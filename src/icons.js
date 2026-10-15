@@ -54,9 +54,14 @@ const P = {
   message: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/>',
 };
 
+const FILLED = ['flame', 'star', 'heart'];
 export function icon(name, size = 22) {
   const inner = P[name] || P.help;
-  return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+  const filled = FILLED.includes(name);
+  const attrs = filled
+    ? 'fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"'
+    : 'fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"';
+  return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" ${attrs} aria-hidden="true">${inner}</svg>`;
 }
 
 // Иконки уроков / разделов / курсов по id
