@@ -1,6 +1,6 @@
 // Небольшие плоские SVG-иллюстрации для разделов и категорий.
 
-const wrap = (inner) => `<svg viewBox="0 0 140 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}<ellipse cx="48" cy="20" rx="40" ry="15" fill="#fff" opacity=".14"/><ellipse cx="70" cy="103" rx="42" ry="5" fill="#1d2b1d" opacity=".10"/></svg>`;
+const wrap = (inner) => `<svg viewBox="0 0 140 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}<ellipse cx="48" cy="20" rx="40" ry="15" fill="#fff" opacity=".14"/></svg>`;
 
 export const UNIT_ART = {
   // Копилка
@@ -35,7 +35,7 @@ export const CAT_ART = {
 };
 
 // ── Цветные иллюстрации уроков и курсов (плоские, как у Курсича) ──
-const A = (inner) => `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}<ellipse cx="22" cy="11" rx="17" ry="7" fill="#fff" opacity=".16"/><ellipse cx="32" cy="59" rx="19" ry="3.6" fill="#1d2b1d" opacity=".10"/></svg>`;
+const A = (inner) => `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}<ellipse cx="22" cy="11" rx="17" ry="7" fill="#fff" opacity=".16"/></svg>`;
 const coin = (x, y, r = 9, t = '₽') => `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#gGold)" stroke="#e8a90c" stroke-width="2"/><text x="${x}" y="${y + r * 0.38}" text-anchor="middle" font-size="${r * 1.05}" font-weight="900" fill="#8a6100" font-family="Nunito">${t}</text>`;
 
 export const LESSON_ART = {
