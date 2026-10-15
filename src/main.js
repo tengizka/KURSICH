@@ -1,6 +1,7 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { EXTRA_COURSES } from './courses2.js';
+import { EXTRA_COURSES_2 } from './courses3.js';
 import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG } from './mascot.js';
 import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART, GRACE_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
@@ -218,7 +219,7 @@ function beep(ok) { sfx(ok ? 'correct' : 'wrong'); }
 if (!state.soundSeen) { state.sound = true; state.soundSeen = true; save(); }
 
 const app = document.getElementById('app');
-const ALL_COURSES = [{ ...COURSE, cat: 'finance' }, ...EXTRA_COURSES];
+const ALL_COURSES = [{ ...COURSE, cat: 'finance' }, ...EXTRA_COURSES, ...EXTRA_COURSES_2];
 const allLessons = ALL_COURSES.flatMap((co) => co.units.flatMap((u) => u.lessons.map((l) => ({ ...l, unit: u, course: co }))));
 const courseLessons = (co) => co.units.flatMap((u) => u.lessons);
 const courseDone = (co) => courseLessons(co).filter((l) => state.completed[l.id]).length;
@@ -398,6 +399,13 @@ function catalogHtml() {
       <div class="cat-chev">›</div></button>`).join('')}
   </div>`;
 }
+const COURSE_SUB = {
+  'finlit-2026': 'Основы', invest: 'Рост денег', crypto: 'Рост денег', flat: 'Жильё и мышление', psymoney: 'Жильё и мышление',
+  sales: 'Продажи и бизнес', business: 'Продажи и бизнес', market: 'Продажи и бизнес', marketing: 'Продажи и бизнес',
+  brand: 'Карьера и развитие', career: 'Карьера и развитие', freelance: 'Карьера и развитие', talks: 'Карьера и развитие', learn: 'Карьера и развитие',
+  ai: 'ИИ и алгоритмы', ai2: 'ИИ и алгоритмы', algo: 'ИИ и алгоритмы', code: 'Код и безопасность', cyber: 'Код и безопасность',
+  eng: 'Старт и практика', engt: 'Старт и практика', draw: 'Рисунок', design: 'Дизайн и видео', video: 'Дизайн и видео', story: 'Истории',
+};
 const ALL_CATS = [{ id: 'finance', title: 'Финансы', desc: 'Деньги, вклады, кредиты, инвестиции' }, ...OTHER_CATS];
 function catHtml(catId) {
   const cat = ALL_CATS.find((c) => c.id === catId) || ALL_CATS[0];
@@ -408,10 +416,10 @@ function catHtml(catId) {
       <div class="cat-art">${catId === 'finance' ? mascotFinancierSVG() : (CAT_ART[cat.art] || mascotSVG('happy', state.outfit))}</div>
       <div class="cat-text"><h3>${cat.title}</h3><p>${catId === 'finance' ? 'Курсич в галстуке — значит, говорим о деньгах.' : cat.desc}</p></div>
     </div>
-    <div class="course-grid">
-      ${courses.map((c) => { const d = courseDone(c), t = courseLessons(c).length; return `<button class="course-tile open" data-course="${c.id}">
+    ${(() => { const groups = []; courses.forEach((c) => { const sub = COURSE_SUB[c.id] || 'Курсы'; let g = groups.find((x) => x.sub === sub); if (!g) { g = { sub, items: [] }; groups.push(g); } g.items.push(c); });
+      return groups.map((g) => `<h3 class="subhead">${g.sub}</h3><div class="course-grid">${g.items.map((c) => { const d = courseDone(c), t = courseLessons(c).length; return `<button class="course-tile open" data-course="${c.id}">
         <div class="te tile-art">${COURSE_ART[c.id] || c.art || ''}</div><h3>${c.title}</h3><p>${c.subtitle || c.desc || ''}</p>
-        <span class="pill">${d ? `Пройдено ${d} из ${t}` : 'Начать'}</span></button>`; }).join('')}
+        <span class="pill">${d ? `Пройдено ${d} из ${t}` : 'Начать'}</span></button>`; }).join('')}</div>`).join(''); })()}
     </div>
   </div>`;
 }
@@ -492,6 +500,8 @@ const OUTFIT_LIST = [
   { id: 'coder', name: 'Программист', course: 'code', req: 'Пройди «Первый код»' },
   { id: 'artist', name: 'Художник', course: 'draw', req: 'Пройди «Рисование: первые шаги»' },
   { id: 'traveler', name: 'Путешественник', course: 'engt', req: 'Пройди «Английский в путешествии»' },
+  { id: 'blogger', name: 'Блогер', course: 'brand', req: 'Пройди «Личный бренд и блог»' },
+  { id: 'hacker', name: 'Хакер', course: 'cyber', req: 'Пройди «Кибербезопасность»' },
   { id: 'graduate', name: 'Выпускник', req: 'Заверши любые 3 курса' },
 ];
 function outfitUnlocked(o) {
