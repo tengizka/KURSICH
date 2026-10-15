@@ -1,5 +1,6 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
+import { EXTRA_COURSES } from './courses2.js';
 import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG } from './mascot.js';
 import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART, GRACE_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
@@ -162,7 +163,7 @@ const notify = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } cat
 // ── Состояние ───────────────────────────────
 const KEY = 'kursich_state_v2';
 const todayStr = () => new Date().toISOString().slice(0, 10);
-const defaultState = () => ({ xp: 0, hearts: 5, streak: 0, bestStreak: 0, lastDay: null, completed: {}, seenAch: [], name: '', onboarded: false, sound: false, dark: false });
+const defaultState = () => ({ xp: 0, hearts: 5, streak: 0, bestStreak: 0, lastDay: null, completed: {}, seenAch: [], name: '', onboarded: false, sound: false, dark: false, outfit: 'none' });
 let state = (() => {
   try {
     const cur = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -217,7 +218,11 @@ function beep(ok) { sfx(ok ? 'correct' : 'wrong'); }
 if (!state.soundSeen) { state.sound = true; state.soundSeen = true; save(); }
 
 const app = document.getElementById('app');
-const allLessons = COURSE.units.flatMap((u) => u.lessons.map((l) => ({ ...l, unit: u })));
+const ALL_COURSES = [{ ...COURSE, cat: 'finance' }, ...EXTRA_COURSES];
+const allLessons = ALL_COURSES.flatMap((co) => co.units.flatMap((u) => u.lessons.map((l) => ({ ...l, unit: u, course: co }))));
+const courseLessons = (co) => co.units.flatMap((u) => u.lessons);
+const courseDone = (co) => courseLessons(co).filter((l) => state.completed[l.id]).length;
+let curCourse = ALL_COURSES[0];
 const doneCount = () => Object.keys(state.completed).length;
 const level = () => Math.floor(state.xp / 100) + 1;
 const firstUndoneIdx = () => allLessons.findIndex((l) => !state.completed[l.id]);
@@ -359,7 +364,7 @@ function resetScroll() { const sc = document.getElementById('app-scroll') || app
 function renderApp() {
   applyTheme(); app.classList.remove('in-lesson');
   let html = '';
-  if (appTab === 'courses') html = inPath ? pathHtml() : (catView === 'finance' ? financeHtml() : catalogHtml());
+  if (appTab === 'courses') html = inPath ? pathHtml(curCourse) : (catView === 'catalog' ? catalogHtml() : catHtml(catView));
   else if (appTab === 'profile') html = profileHtml();
   else if (appTab === 'ach') html = achHtml();
   else if (appTab === 'settings') html = settingsHtml();
@@ -379,36 +384,34 @@ const OTHER_CATS = [
 function catalogHtml() {
   return `<div class="screen">
     <div class="bg-decor"><span style="top:70px;right:22px">✦</span><span style="top:210px;left:14px">✦</span><span style="top:430px;right:36px">✦</span></div>
-    <div class="greet-row"><div class="gm">${mascotSVG('idle')}</div>
+    <div class="greet-row"><div class="gm">${mascotSVG('idle', state.outfit)}</div>
       <div><h2>Привет${state.name ? ', ' + esc(state.name) : ''}!</h2><p>Что учим сегодня?</p></div></div>
     <button class="cat-card" id="open-fin-cat">
       <div class="cat-art">${mascotFinancierSVG()}</div>
       <div class="cat-text"><h3>Финансы</h3><p>Деньги, вклады, кредиты, инвестиции</p>
-      <span class="pill cat-pill">${doneCount() ? `Идёт курс · ${doneCount()}/${totalLessons}` : 'Есть открытый курс'}</span></div>
+      <span class="pill cat-pill">${courseDone(ALL_COURSES[0]) ? `Идёт курс · ${courseDone(ALL_COURSES[0])}/${totalLessons}` : 'Есть открытый курс'}</span></div>
       <div class="cat-chev">›</div>
     </button>
-    ${OTHER_CATS.map((c) => `<button class="cat-card small" data-locked-cat="${c.id}">
+    ${OTHER_CATS.map((c) => `<button class="cat-card small" data-cat="${c.id}">
       <div class="cat-art small-art" style="background:${c.grad}">${CAT_ART[c.art]}</div>
-      <div class="cat-text"><h3>${c.title}</h3><p>${c.desc}</p><span class="pill soon">${icon('lock',13)} Скоро</span></div>
+      <div class="cat-text"><h3>${c.title}</h3><p>${c.desc}</p><span class="pill cat-pill">Курсы открыты</span></div>
       <div class="cat-chev">›</div></button>`).join('')}
   </div>`;
 }
-function financeHtml() {
-  const finLocked = OTHER_COURSES.filter((c) => c.cat === 'finance');
+const ALL_CATS = [{ id: 'finance', title: 'Финансы', desc: 'Деньги, вклады, кредиты, инвестиции' }, ...OTHER_CATS];
+function catHtml(catId) {
+  const cat = ALL_CATS.find((c) => c.id === catId) || ALL_CATS[0];
+  const courses = ALL_COURSES.filter((c) => c.cat === catId);
   return `<div class="screen">
-    <button class="menu-row" id="back-catalog" style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Все темы</button>
+    <button class="menu-row" id="back-catalog" style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Карта мира</button>
     <div class="cat-card hero-cat" style="cursor:default">
-      <div class="cat-art">${mascotFinancierSVG()}</div>
-      <div class="cat-text"><h3>Финансы</h3><p>Курсич в галстуке — значит, говорим о деньгах.</p></div>
+      <div class="cat-art">${catId === 'finance' ? mascotFinancierSVG() : (CAT_ART[cat.art] || mascotSVG('happy', state.outfit))}</div>
+      <div class="cat-text"><h3>${cat.title}</h3><p>${catId === 'finance' ? 'Курсич в галстуке — значит, говорим о деньгах.' : cat.desc}</p></div>
     </div>
     <div class="course-grid">
-      <button class="course-tile open" id="open-fin">
-        <div class="te tile-art">${COURSE_ART[COURSE.id] || ''}</div><h3>${COURSE.title}</h3><p>${COURSE.subtitle}</p>
-        <span class="pill">${doneCount() ? `Пройдено ${doneCount()} из ${totalLessons}` : 'Начать'}</span>
-      </button>
-      ${finLocked.map((c, i) => `<button class="course-tile locked" data-locked="${c.id}">
-        <div class="te tile-art">${COURSE_ART[c.id] || ''}</div><h3>${c.title}</h3><p>${c.desc}</p>
-        <span class="pill soon">${icon('lock',13)} Скоро</span></button>`).join('')}
+      ${courses.map((c) => { const d = courseDone(c), t = courseLessons(c).length; return `<button class="course-tile open" data-course="${c.id}">
+        <div class="te tile-art">${COURSE_ART[c.id] || c.art || ''}</div><h3>${c.title}</h3><p>${c.subtitle || c.desc || ''}</p>
+        <span class="pill">${d ? `Пройдено ${d} из ${t}` : 'Начать'}</span></button>`; }).join('')}
     </div>
   </div>`;
 }
@@ -446,35 +449,57 @@ function showLockedModal(course) {
 // ── Путь курса ───────────────────────────────
 const OFFSETS = [0, 52, 84, 52, 0, -52, -84, -52]; // зигзаг как в Duolingo: влево-вправо
 const UNIT_DECOR = { u1: ['🧾', '💸'], u2: ['💳', '🧮'], u3: ['📄', '⏳'], u4: ['📊', '🪙'], u5: ['🧾', '🏠'], u6: ['📱', '🔐'] };
-function pathHtml() {
+function pathHtml(course) {
+  const flat = courseLessons(course);
+  const firstUndone = flat.findIndex((l) => !state.completed[l.id]);
+  const cat = ALL_CATS.find((c) => c.id === course.cat);
   let gi = -1;
-  const units = COURSE.units.map((u) => {
+  const units = course.units.map((u) => {
     const pts = u.lessons.map((l, li) => ({ x: 170 + OFFSETS[li % OFFSETS.length], y: 70 + li * 172 }));
     const d = pts.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i-1].x} ${pts[i-1].y + 70}, ${p.x} ${p.y - 70}, ${p.x} ${p.y}`).join(' ');
     const trail = `<svg class="path-trail" viewBox="0 0 340 ${pts.length * 172 + 30}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${u.color}" stroke-width="9" stroke-linecap="round" stroke-dasharray="0.1 17" opacity=".5"/></svg>`;
     const nodes = u.lessons.map((l, li) => {
       gi++;
-      const done = !!state.completed[l.id], unlocked = isUnlocked(gi), current = unlocked && !done;
+      const done = !!state.completed[l.id], unlocked = firstUndone === -1 || gi <= firstUndone, current = unlocked && !done;
       return `<div class="node-wrap" style="transform:translateX(${OFFSETS[li % OFFSETS.length]}px)">
         ${current ? '<div class="start-bubble">СТАРТ</div>' : ''}
-        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? icon('check',30) : !unlocked ? icon('lock',25) : `<span class="node-art">${LESSON_ART[l.id] || ''}</span>`}</button>
+        <button class="node ${done ? 'done' : ''} ${!unlocked ? 'locked' : ''} ${current ? 'current' : ''}" style="--nd:${u.dark};background:${done ? '' : u.color}" data-lesson="${l.id}" ${!unlocked ? 'disabled' : ''}>${done ? icon('check',30) : !unlocked ? icon('lock',25) : `<span class="node-art">${LESSON_ART[l.id] || l.art || ''}</span>`}</button>
         <div class="node-label ${!unlocked ? 'locked' : ''}">${l.title}</div>
         <div class="mini-progress">+${l.xp} XP</div></div>`;
     }).join('');
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
     return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${icon(UNIT_ICON[u.id] || 'book',32)}</div>
       <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
-      <div class="path">${trail}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
+      <div class="path">${trail}<div class="path-art">${UNIT_ART[u.id] || course.art || ''}</div>${nodes}</div>`;
   }).join('');
+  const dc = courseDone(course);
   return `<div class="screen" style="padding-top:10px">
-    <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> Финансы</button>
-    <h2 class="st" style="margin-top:6px">${COURSE.title}</h2>
-    <p class="sub">${doneCount()} из ${totalLessons} уроков · уровень ${level()}</p>
-    <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (doneCount() / totalLessons) * 100)}%"></i></div>
+    <button class="menu-row" id="back-catalog" style="border:0;padding:6px 0 2px"><span style="font-size:20px">‹</span> ${cat ? cat.title : 'Темы'}</button>
+    <h2 class="st" style="margin-top:6px">${course.title}</h2>
+    <p class="sub">${dc} из ${flat.length} уроков · уровень ${level()}</p>
+    <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (dc / flat.length) * 100)}%"></i></div>
     ${units}</div>`;
 }
 
 // ── Профиль / достижения / настройки ───────────────────────────────
+const OUTFIT_LIST = [
+  { id: 'none', name: 'Курсич', req: null },
+  { id: 'financier', name: 'Финансист', course: 'invest', req: 'Пройди курс «Инвестиции»' },
+  { id: 'detective', name: 'Детектив', course: 'finlit-2026', req: 'Пройди «Финансовую грамотность»' },
+  { id: 'builder', name: 'Строитель', course: 'flat', req: 'Пройди «Квартирный вопрос»' },
+  { id: 'cosmonaut', name: 'Космонавт', course: 'crypto', req: 'Пройди «Криптовалюта»' },
+  { id: 'seller', name: 'Продавец', course: 'sales', req: 'Пройди «Продажи без впаривания»' },
+  { id: 'coder', name: 'Программист', course: 'code', req: 'Пройди «Первый код»' },
+  { id: 'artist', name: 'Художник', course: 'draw', req: 'Пройди «Рисование: первые шаги»' },
+  { id: 'traveler', name: 'Путешественник', course: 'engt', req: 'Пройди «Английский в путешествии»' },
+  { id: 'graduate', name: 'Выпускник', req: 'Заверши любые 3 курса' },
+];
+function outfitUnlocked(o) {
+  if (!o.req) return true;
+  if (o.id === 'graduate') return ALL_COURSES.filter((c) => courseLessons(c).length && courseDone(c) === courseLessons(c).length).length >= 3;
+  const c = ALL_COURSES.find((x) => x.id === o.course);
+  return !!c && courseDone(c) === courseLessons(c).length;
+}
 function profileHtml() {
   const got = ACHIEVEMENTS.filter((a) => a.check(state)).length;
   return `<div class="screen">
@@ -488,6 +513,13 @@ function profileHtml() {
       <button class="menu-row" id="go-dict"><span class="mi" style="background:#ddf4ff;color:#1899d6">${icon('book',22)}</span>Словарь терминов<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">если забыл слово</span><span class="chev">›</span></button>
       <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf;color:#b45309">${icon('trophy',22)}</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
       <button class="menu-row" id="go-settings"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('sliders',22)}</span>Настройки<span class="chev">›</span></button>
+    </div>
+    <div class="cardbox">
+      <h3 style="margin:2px 0 4px;font-size:17px;font-weight:900">Коллекция Курсичей</h3>
+      <p style="margin:0 0 10px;color:var(--muted);font-weight:700;font-size:13px">Образы открываются за пройденные курсы. Выбери, в каком виде Курсич встречает тебя в уроках.</p>
+      <div class="outfit-grid">
+      ${OUTFIT_LIST.map((o) => { const un = outfitUnlocked(o); const sel = state.outfit === o.id; return `<button class="outfit ${sel ? 'sel' : ''}" data-outfit="${o.id}" ${un ? '' : 'disabled'}><span class="outfit-m">${mascotSVG('happy', o.id)}</span><span class="outfit-n">${o.name}</span><span class="outfit-r">${un ? (sel ? 'Выбран' : 'Надеть') : o.req}</span></button>`; }).join('')}
+      </div>
     </div>
   </div>`;
 }
@@ -547,6 +579,9 @@ function bindApp() {
   };
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
   app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); resetScroll(); });
+  app.querySelectorAll('[data-cat]').forEach((b) => b.onclick = () => { catView = b.dataset.cat; haptic('medium'); renderApp(); resetScroll(); });
+  app.querySelectorAll('[data-course]').forEach((b) => b.onclick = () => { const c = ALL_COURSES.find((x) => x.id === b.dataset.course); if (!c) return; curCourse = c; inPath = true; scrollCurrent = true; haptic('medium'); renderApp(); });
+  app.querySelectorAll('[data-outfit]').forEach((b) => b.onclick = () => { state.outfit = b.dataset.outfit; save(); haptic('medium'); sfx('pop'); renderApp(); });
   const openFinCat = document.getElementById('open-fin-cat');
   if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); resetScroll(); };
   app.querySelectorAll('[data-locked-cat]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_CATS.find((x) => x.id === b.dataset.lockedCat); if (c) showLockedCatModal(c); });
@@ -601,14 +636,20 @@ function startLesson(lessonId) {
     ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
     { kind: 'recap' },
   ];
+  const pool = allLessons.filter((x) => x.id !== lesson.id && state.completed[x.id]).flatMap((x) => x.quiz.filter((q) => q.type === 'single' || q.type === 'bool'));
+  if (pool.length) {
+    const mq = pool[Math.floor(Date.now() / 1000) % pool.length];
+    steps.splice(steps.length - 1, 0, { kind: 'quiz', ...mq, isMix: true, counted: true });
+  }
   steps.forEach((st, i) => { st.uid = i; });
-  L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false, pendingRepeat: false };
+  L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false, pendingRepeat: false, streak: 0 };
+  curCourse = lesson.course || curCourse;
   lessonSeen = new Set();
   sfx('open');
   try { tg?.BackButton?.show(); tg.BackButton.onClick(exitLesson); } catch (e) {}
   renderLesson();
 }
-function exitLesson() { L = null; lessonSeen = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; scrollCurrent = true; render(); }
+function exitLesson() { L = null; lessonSeen = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; catView = curCourse.cat || 'finance'; inPath = true; scrollCurrent = true; render(); }
 
 function renderLesson() {
   hideAbbr();
@@ -618,20 +659,38 @@ function renderLesson() {
   let body = '';
   if (step.kind === 'theory') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'theory').length;
-    body = `<span class="phase-tag theory">${icon('book',16)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
-      <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
+    const theoryEmo = ['idle', 'think', 'amazed', 'happy'][step.ci % 4];
+    body = `<span class="phase-tag theory">${icon('book',16)} ${L.lesson.article ? 'Статья' : 'Сначала разберёмся'} · ${n} из ${L.theoryN}</span>
+      <div class="mascot-row"><div class="mwrap">${mascotSVG(theoryEmo, state.outfit)}</div>
         <div class="bubble"><b>${abbr(step.t)}</b><br>${abbr(step.b)}</div></div>
-      <div class="theory-visual">${step.ci >= 2 ? GRACE_ART : ((step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || '')}</div>
+      <div class="theory-visual">${step.ci >= 2 ? GRACE_ART : ((step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || L.lesson.art || '')}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz' && !s.isRepeat).length;
-    body = (step.isRepeat
+    const tag = step.isRepeat
       ? `<span class="phase-tag recap">${icon('history',16)} Повторим — было с ошибкой</span>`
-      : `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>`)
-      + `<div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('idle')}</div>
+      : step.isMix
+        ? `<span class="phase-tag recap">${icon('history',16)} Микс-повторение · из пройденного</span>`
+        : `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>`;
+    let inner = '';
+    if (step.type === 'dialog') {
+      inner = `<div class="chat">${step.chat.map((m) => `<div class="chat-row"><div class="chat-name">${m.n}</div><div class="chat-bubble">${m.t}</div></div>`).join('')}</div>
+      <div class="bubble" style="font-size:16px;margin-bottom:12px"><b>${abbr(step.q)}</b></div>
+      <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>`;
+    } else if (step.type === 'order') {
+      if (!step.sel) step.sel = step.savedOrder ? [...step.savedOrder] : [];
+      const rot = step.items.map((t, i) => ({ t, i })).sort((a, b) => ((a.i + step.uid) % step.items.length) - ((b.i + step.uid) % step.items.length));
+      const mixed = [...rot.slice(1), rot[0]];
+      inner = `<div class="bubble" style="font-size:16px;margin-bottom:12px"><b>${abbr(step.q)}</b></div>
+      <div class="order-sel" id="order-sel"></div>
+      <div class="order-pool">${mixed.map((x) => `<button class="order-chip" data-ord="${x.i}">${x.t}</button>`).join('')}</div>`;
+    } else {
+      inner = `${step.type === 'case' && step.doc ? `<div class="doc-card"><div class="doc-title">${step.doc.title}</div><p>${step.doc.lines.join('<br>')}</p></div>` : ''}
+      <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('think', state.outfit)}</div>
         <div class="bubble" style="font-size:17px"><b>${abbr(step.q)}</b></div></div>
-      <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${abbr(o)}</button>`).join('')}</div>
-      <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
+      <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>`;
+    }
+    body = tag + inner + `<div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
   } else { // recap
     body = `<span class="phase-tag recap">${icon('target',16)} Закрепим</span>
       <h2 style="margin-top:14px">Главное из урока</h2>
@@ -670,18 +729,40 @@ function renderLesson() {
       checkBtn.disabled = false;
     });
     checkBtn.onclick = checkAnswer;
+    if (step.type === 'order') {
+      const selBox = document.getElementById('order-sel');
+      const paint = () => {
+        selBox.innerHTML = step.sel.length
+          ? step.sel.map((oi, pos) => `<button class="order-chip picked" data-unsel="${pos}"><b>${pos + 1}</b>${step.items[oi]}</button>`).join('')
+          : '<span class="order-hint">Нажимай шаги внизу по порядку</span>';
+        app.querySelectorAll('[data-ord]').forEach((b) => { b.style.display = step.sel.includes(Number(b.dataset.ord)) ? 'none' : ''; });
+        checkBtn.disabled = step.sel.length !== step.items.length || L.checked;
+      };
+      app.querySelectorAll('[data-ord]').forEach((b) => b.onclick = () => {
+        if (L.checked) return;
+        step.sel.push(Number(b.dataset.ord)); step.savedOrder = [...step.sel]; haptic(); sfx('click'); paint();
+      });
+      selBox.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-unsel]'); if (!b || L.checked) return;
+        step.sel.splice(Number(b.dataset.unsel), 1); step.savedOrder = [...step.sel]; haptic(); sfx('click'); paint();
+      });
+      paint();
+    }
   }
 }
 function checkAnswer() {
   const cta = app.querySelector('.lesson-body .sticky-cta'); if (cta) cta.remove();
   const step = L.steps[L.idx];
-  const ok = L.selected === step.correct;
+  const ok = step.type === 'order'
+    ? (step.sel && step.sel.length === step.items.length && step.sel.every((v, i) => v === i))
+    : L.selected === step.correct;
   L.checked = true;
+  if (!step.isMix) L.streak = ok ? (L.streak || 0) + 1 : 0;
   if (!step.counted) {
     step.counted = true;
     if (ok) L.correct++;
   }
-  L.pendingRepeat = !ok;
+  L.pendingRepeat = !ok && !step.isMix;
   if (ok) { notify('success'); beep(true); } else { notify('error'); haptic('heavy'); beep(false); }
   app.querySelectorAll('[data-opt]').forEach((b) => {
     b.disabled = true; const i = Number(b.dataset.opt);
@@ -689,10 +770,12 @@ function checkAnswer() {
   });
   const fb = document.createElement('div');
   fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
-  fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(ok ? 'happy' : 'oops')}</div>
-    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${abbr(step.explain)}</p>
+  const fbEmo = ok ? (L.streak >= 5 ? 'party' : L.streak >= 3 ? 'star' : 'happy') : 'oops';
+  fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(fbEmo, state.outfit)}</div>
+    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3>${ok && L.streak >= 3 ? `<div class="streak-line">${icon('star',16)} Серия: ${L.streak} верных подряд!</div>` : ''}<p>${abbr(step.explain)}</p>
     <button class="btn ${ok ? '' : 'red'}" id="fb-next">Дальше</button>`;
   document.body.appendChild(fb);
+  if (ok && L.streak >= 5) confetti(30);
   document.getElementById('fb-next').onclick = () => {
     fb.remove(); haptic(); sfx('pop');
     if (L.pendingRepeat) {
@@ -720,7 +803,7 @@ function finishLesson() {
   state.xp += xpGain; save();
   const perfect = acc === 1;
   app.innerHTML = `<div class="app-scroll"><div class="result">
-    <div class="mwrap">${mascotSVG('proud')}</div>
+    <div class="mwrap">${mascotSVG(perfect ? 'party' : 'proud', state.outfit)}</div>
     <div class="big-xp">+${xpGain} XP</div>
     <h2 style="margin:0;font-size:23px;font-weight:900">${perfect ? 'Всё верно!' : 'Урок пройден'}</h2>
     <div class="result-stats">
