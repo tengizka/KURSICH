@@ -2,7 +2,7 @@ import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { EXTRA_COURSES } from './courses2.js';
 import { EXTRA_COURSES_2 } from './courses3.js';
-import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG } from './mascot.js';
+import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG, mascotTopicSVG } from './mascot.js';
 import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART, GRACE_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 import curlsUrl from './assets/curls.png';
@@ -383,20 +383,28 @@ const OTHER_CATS = [
   { id: 'art', title: 'Творчество', desc: 'Рисование, музыка, хобби', art: 'art', grad: 'linear-gradient(135deg,#e0aaff,#ce82ff)' },
 ];
 function catalogHtml() {
+  const topics = ALL_CATS.map((c) => {
+    const courses = ALL_COURSES.filter((x) => x.cat === c.id);
+    const total = courses.reduce((n, x) => n + courseLessons(x).length, 0);
+    const done = courses.reduce((n, x) => n + courseDone(x), 0);
+    return { ...c, total, done, nCourses: courses.length };
+  });
   return `<div class="screen">
     <div class="bg-decor"><span style="top:70px;right:22px">✦</span><span style="top:210px;left:14px">✦</span><span style="top:430px;right:36px">✦</span></div>
     <div class="greet-row"><div class="gm">${mascotSVG('idle', state.outfit)}</div>
       <div><h2>Привет${state.name ? ', ' + esc(state.name) : ''}!</h2><p>Что учим сегодня?</p></div></div>
-    <button class="cat-card" id="open-fin-cat">
-      <div class="cat-art">${mascotFinancierSVG()}</div>
-      <div class="cat-text"><h3>Финансы</h3><p>Деньги, вклады, кредиты, инвестиции</p>
-      <span class="pill cat-pill">${courseDone(ALL_COURSES[0]) ? `Идёт курс · ${courseDone(ALL_COURSES[0])}/${totalLessons}` : 'Есть открытый курс'}</span></div>
-      <div class="cat-chev">›</div>
-    </button>
-    ${OTHER_CATS.map((c) => `<button class="cat-card small" data-cat="${c.id}">
-      <div class="cat-art small-art" style="background:${c.grad}">${CAT_ART[c.art]}</div>
-      <div class="cat-text"><h3>${c.title}</h3><p>${c.desc}</p><span class="pill cat-pill">Курсы открыты</span></div>
-      <div class="cat-chev">›</div></button>`).join('')}
+    <div class="topic-head"><h3>Карта мира</h3><span>Листай влево-вправо</span></div>
+    <div class="topic-carousel" id="topic-carousel">
+      ${topics.map((t) => `<button class="topic-card" data-cat="${t.id}">
+        <span class="topic-art">${t.id === 'finance' ? mascotFinancierSVG() : mascotTopicSVG(t.id)}</span>
+        <h3>${t.title}</h3><p>${t.desc}</p>
+        <span class="topic-meta">${t.nCourses} ${t.nCourses % 10 === 1 && t.nCourses !== 11 ? 'курс' : [2, 3, 4].includes(t.nCourses % 10) && ![12, 13, 14].includes(t.nCourses % 100) ? 'курса' : 'курсов'} · ${t.done} из ${t.total} уроков</span>
+        <span class="topic-bar"><i style="width:${t.total ? Math.round((t.done / t.total) * 100) : 0}%"></i></span>
+        <span class="topic-go">Выбрать ›</span>
+      </button>`).join('')}
+    </div>
+    <div class="topic-dots" id="topic-dots">${topics.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div>
+    <p class="topic-hint">В каждой теме — свои курсы, уроки и статьи. Пройденное не теряется: прогресс общий.</p>
   </div>`;
 }
 const COURSE_SUB = {
@@ -413,7 +421,7 @@ function catHtml(catId) {
   return `<div class="screen">
     <button class="menu-row" id="back-catalog" style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Карта мира</button>
     <div class="cat-card hero-cat" style="cursor:default">
-      <div class="cat-art">${catId === 'finance' ? mascotFinancierSVG() : (CAT_ART[cat.art] || mascotSVG('happy', state.outfit))}</div>
+      <div class="cat-art">${catId === 'finance' ? mascotFinancierSVG() : mascotTopicSVG(catId)}</div>
       <div class="cat-text"><h3>${cat.title}</h3><p>${catId === 'finance' ? 'Курсич в галстуке — значит, говорим о деньгах.' : cat.desc}</p></div>
     </div>
     ${(() => { const groups = []; courses.forEach((c) => { const sub = COURSE_SUB[c.id] || 'Курсы'; let g = groups.find((x) => x.sub === sub); if (!g) { g = { sub, items: [] }; groups.push(g); } g.items.push(c); });
@@ -590,6 +598,11 @@ function bindApp() {
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
   app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); resetScroll(); });
   app.querySelectorAll('[data-cat]').forEach((b) => b.onclick = () => { catView = b.dataset.cat; haptic('medium'); renderApp(); resetScroll(); });
+  const tcar = document.getElementById('topic-carousel');
+  if (tcar) tcar.addEventListener('scroll', () => {
+    const i = Math.round(tcar.scrollLeft / (tcar.firstElementChild ? tcar.firstElementChild.offsetWidth + 12 : 1));
+    document.querySelectorAll('#topic-dots i').forEach((el, j) => el.classList.toggle('on', j === i));
+  }, { passive: true });
   app.querySelectorAll('[data-course]').forEach((b) => b.onclick = () => { const c = ALL_COURSES.find((x) => x.id === b.dataset.course); if (!c) return; curCourse = c; inPath = true; scrollCurrent = true; haptic('medium'); renderApp(); });
   app.querySelectorAll('[data-outfit]').forEach((b) => b.onclick = () => { state.outfit = b.dataset.outfit; save(); haptic('medium'); sfx('pop'); renderApp(); });
   const openFinCat = document.getElementById('open-fin-cat');
@@ -812,22 +825,33 @@ function finishLesson() {
   const xpGain = firstTime ? Math.round(lesson.xp * (0.5 + 0.5 * acc)) + (acc === 1 ? 5 : 0) : 2;
   state.xp += xpGain; save();
   const perfect = acc === 1;
-  app.innerHTML = `<div class="app-scroll"><div class="result">
-    <div class="mwrap">${mascotSVG(perfect ? 'party' : 'proud', state.outfit)}</div>
-    <div class="big-xp">+${xpGain} XP</div>
-    <h2 style="margin:0;font-size:23px;font-weight:900">${perfect ? 'Всё верно!' : 'Урок пройден'}</h2>
+  const emos = ['party', 'star', 'celebrate', 'excited', 'laugh', 'amazed', 'proud', 'happy'];
+  const emo = emos[Math.floor(Date.now() / 977) % emos.length];
+  const name = state.name ? ', ' + esc(state.name) : '';
+  const phrases = perfect
+    ? ['Идеально! Ни одной ошибки', 'Чисто сработано' + name + '!', 'Вот это уровень!', 'Без единого промаха!', 'Так держать' + name + '!']
+    : ['Урок пройден' + name + '!', 'Ещё один шаг вперёд!', 'Мозг прокачан!', 'Ты справился' + name + '!', 'Новая тема — в копилку!'];
+  const phrase = phrases[Math.floor(Date.now() / 131) % phrases.length];
+  const win = document.createElement('div');
+  win.className = 'win-screen';
+  win.innerHTML = `<div class="win-inner">
+    <div class="win-mascot">${mascotSVG(emo, state.outfit)}</div>
+    <div class="win-xp">+${xpGain} XP</div>
+    <h2>${phrase}</h2>
+    <p class="win-sub">${perfect ? 'Все ответы верны. Курсич в полном восторге.' : 'Урок завершён — знания уложились по полочкам.'}</p>
     <div class="result-stats">
       <div class="rstat"><b style="color:#46a302">${Math.round(acc * 100)}%</b><span>Точность</span></div>
       <div class="rstat"><b style="color:#ff9600">${L.correct}/${L.totalQ}</b><span>Верно</span></div>
       <div class="rstat"><b style="color:#1cb0f6">${icon('heart',18)} ∞</b><span>Сердец</span></div>
     </div>
-    <button class="btn" id="to-path">К урокам</button>
-    <button class="btn ghost" id="retry" style="margin-top:12px">Пройти ещё раз</button>
-  </div></div>`;
-  if (firstTime) confetti(perfect ? 80 : 45);
+    <button class="btn" id="win-path">К урокам</button>
+    <button class="btn ghost" id="win-retry" style="margin-top:12px">Пройти ещё раз</button>
+  </div>`;
+  document.body.appendChild(win);
+  if (firstTime) confetti(perfect ? 90 : 50);
   notify('success'); sfx('complete'); checkAchievements();
-  document.getElementById('to-path').onclick = () => { haptic(); exitLesson(); };
-  document.getElementById('retry').onclick = () => { haptic(); startLesson(lesson.id); };
+  document.getElementById('win-path').onclick = () => { win.remove(); haptic(); exitLesson(); };
+  document.getElementById('win-retry').onclick = () => { win.remove(); haptic(); startLesson(lesson.id); };
 }
 
 render();
