@@ -112,20 +112,22 @@ export function mascotFinancierSVG() {
 
 // Только кудри — для заставки.
 export function mascotCurlsSVG() {
-  return `<svg class="mascot-svg" viewBox="38 20 144 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Кудри Курсича">
-    <g class="m-hair">
-      <ellipse cx="110" cy="68" rx="62" ry="36" fill="#17120e"/>
+  return `<svg class="mascot-svg" viewBox="38 20 144 82" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Кудри Курсича">
+    <defs><clipPath id="curlCut"><rect x="30" y="10" width="160" height="86"/></clipPath></defs>
+    <g class="m-hair" clip-path="url(#curlCut)">
+      <ellipse cx="110" cy="66" rx="64" ry="38" fill="#17120e"/>
       <g fill="#17120e">
-        <circle cx="58" cy="56" r="16"/><circle cx="80" cy="42" r="18"/><circle cx="104" cy="37" r="19"/>
-        <circle cx="128" cy="41" r="17"/><circle cx="150" cy="52" r="15"/><circle cx="164" cy="68" r="13"/>
-        <circle cx="50" cy="74" r="13"/>
-        <circle cx="62" cy="94" r="10"/><circle cx="80" cy="98" r="10"/><circle cx="98" cy="99" r="10"/>
-        <circle cx="116" cy="99" r="10"/><circle cx="134" cy="98" r="10"/><circle cx="152" cy="94" r="10"/>
+        <circle cx="56" cy="54" r="17"/><circle cx="79" cy="40" r="19"/><circle cx="104" cy="35" r="20"/>
+        <circle cx="129" cy="39" r="18"/><circle cx="151" cy="50" r="16"/><circle cx="166" cy="66" r="14"/>
+        <circle cx="48" cy="72" r="14"/>
+        <circle cx="64" cy="88" r="12"/><circle cx="84" cy="92" r="12"/><circle cx="104" cy="93" r="12"/>
+        <circle cx="124" cy="93" r="12"/><circle cx="144" cy="92" r="12"/><circle cx="160" cy="88" r="12"/>
       </g>
       <g stroke="#5a4a3d" stroke-width="2.8" fill="none" stroke-linecap="round">
-        <path d="M68 62a8 8 0 1 1 8 8"/><path d="M97 52a8 8 0 1 1 8 8"/>
-        <path d="M126 56a8 8 0 1 1 8 8"/><path d="M146 72a7 7 0 1 1 7 7"/>
+        <path d="M66 58a8 8 0 1 1 8 8"/><path d="M96 48a8 8 0 1 1 8 8"/>
+        <path d="M126 52a8 8 0 1 1 8 8"/><path d="M148 68a7 7 0 1 1 7 7"/>
       </g>
     </g>
+    <rect x="42" y="94" width="136" height="4" rx="2" fill="#17120e"/>
   </svg>`;
 }
