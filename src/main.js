@@ -1,7 +1,7 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG } from './mascot.js';
-import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART } from './illustrations.js';
+import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART, GRACE_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 import curlsUrl from './assets/curls.png';
 
@@ -361,7 +361,7 @@ function profileHtml() {
       ${tgPhoto ? `<img class="tg-avatar" src="${esc(tgPhoto)}" alt="">` : `<div class="tg-initial">${esc((state.name || 'К')[0].toUpperCase())}</div>`}
       <div><div style="font-size:19px;font-weight:900">${esc(state.name) || 'Ученик'}</div>
       <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ${state.xp} XP</div>
-      <div style="font-weight:800;color:var(--muted);font-size:13px">${state.streak} дн. — серия заходов · уроков: ${doneCount()}/${totalLessons}</div></div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px">Уроков пройдено: ${doneCount()} из ${totalLessons}</div></div>
     </div>
     <div class="cardbox" style="padding:4px 16px">
       <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf;color:#b45309">${icon('trophy',22)}</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
@@ -474,7 +474,7 @@ function renderLesson() {
     body = `<span class="phase-tag theory">${icon('book',16)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
       <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
         <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
-      <div class="theory-visual">${(step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || ''}</div>
+      <div class="theory-visual">${step.ci >= 2 ? GRACE_ART : ((step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || '')}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz' && !s.isRepeat).length;

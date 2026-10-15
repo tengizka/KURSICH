@@ -100,3 +100,6 @@ export const CARD2_ART = {
   u6l2: A(`<rect x="18" y="8" width="28" height="48" rx="8" fill="#263238"/><rect x="22" y="14" width="20" height="32" rx="4" fill="#e5f7d0"/><path d="M32 20l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z" fill="url(#gGreen)"/><path d="M27 41l3 3 6-6" stroke="#46a302" stroke-width="3" fill="none" stroke-linecap="round"/>`),
   u6l3: A(`${coin(18, 46, 9)}${coin(30, 38, 10)}${coin(44, 28, 12)}<path d="M14 52c10-2 12-10 18-14s10-4 14-12" stroke="#58cc02" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 24l6-6 1 9" stroke="#58cc02" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
 };
+
+/* третья карточка (льготный период) */
+export const GRACE_ART = `<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="78" rx="42" ry="40" fill="#fff" stroke="#dfe7ee" stroke-width="4"/><circle cx="100" cy="78" r="30" fill="#fff7eb"/><path d="M100 60v18l13 9" fill="none" stroke="#ff9600" stroke-width="6" stroke-linecap="round"/><path d="M84 26h32" stroke="#ffb020" stroke-width="8" stroke-linecap="round"/><path d="M100 26v8" stroke="#ffb020" stroke-width="6" stroke-linecap="round"/><path d="M58 44a52 52 0 0 1 84 0" fill="none" stroke="#58cc02" stroke-width="7" stroke-linecap="round"/><path d="M140 34l8 10-13 3z" fill="#58cc02"/></svg>`;
