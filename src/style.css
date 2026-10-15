@@ -6,9 +6,9 @@
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none}
-body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(180deg,#e8f6ff 0%,#eff9e4 48%,#f7fbef 100%);color:var(--ink);position:fixed;inset:0;width:100%;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',system-ui,sans-serif;background:linear-gradient(180deg,#f2f5ef 0%,#edf2e9 52%,#f4f1e8 100%);color:var(--ink);position:fixed;inset:0;width:100%;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
-#app{max-width:480px;margin:0 auto;height:100dvh;max-height:100dvh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;position:relative;box-shadow:0 0 40px rgba(0,0,0,.06);padding-bottom:86px;background:linear-gradient(180deg,rgba(233,246,255,.45),rgba(246,250,239,.30) 45%,rgba(246,250,239,.48));z-index:1}
+#app{max-width:480px;margin:0 auto;height:100dvh;max-height:100dvh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;position:relative;box-shadow:0 0 40px rgba(0,0,0,.06);padding-bottom:86px;background:linear-gradient(180deg,rgba(244,247,240,.52),rgba(246,248,242,.34) 45%,rgba(245,243,236,.5));z-index:1}
 
 /* ── Top bar ─────────────────────────── */
 .topbar{position:sticky;top:0;z-index:40;background:#fff;border-bottom:2px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:12px}
@@ -271,7 +271,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .hero-cat{background:linear-gradient(135deg,#58cc02,#7ed321);border-color:#46a302;color:#fff;cursor:default}
 .hero-cat p{color:rgba(255,255,255,.92)}
 .financier{position:relative;display:block}
-.fin-tie{position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:29px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
+.fin-tie{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:19px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
 .fin-coin{position:absolute;top:2px;right:0;width:30px;height:30px;border-radius:50%;background:#ffc800;border:2px solid #e0a800;color:#8a6100;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:16px;animation:coinSpin 3.2s ease-in-out infinite}
 @keyframes coinSpin{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.12)}}
 .path{overflow:visible}
@@ -507,7 +507,7 @@ body.dark .abbr:active{background:#17384d}
 #abbr-pop p{margin:6px 0 0;color:var(--muted,#777);font-weight:600;font-size:14px;line-height:1.45}
 
 /* ── Парящий 3D-фон ── */
-#bg-scene{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);overflow:hidden;pointer-events:none;z-index:0}
+#bg-scene{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);overflow:hidden;pointer-events:none;z-index:0;background-image:radial-gradient(rgba(80,110,80,.09) 1px,transparent 1.3px);background-size:22px 22px}
 .bg-obj{position:absolute;display:block;opacity:.55;filter:blur(.7px) saturate(1.05);will-change:transform;animation:floatObj 9s ease-in-out infinite}
 .bg-obj svg{display:block;width:100%;height:auto}
 .bg-obj.o1{width:124px;top:76px;right:-30px;animation-duration:10s}
@@ -619,3 +619,15 @@ body.dark .ach-pop{background:linear-gradient(135deg,#33300f,#17300f)}
 .outfit-m{width:52px}
 .outfit-n{font-size:12px}
 .outfit-r{font-size:9.5px}
+
+/* ── Взрослый фон: пятна, линия, кольца ── */
+.bg-blob{position:absolute;border-radius:50%;filter:blur(46px);will-change:transform;animation:blobFloat 18s ease-in-out infinite}
+.bg-blob.bb1{width:300px;height:300px;top:-90px;right:-80px;background:#cdeac2;opacity:.55}
+.bg-blob.bb2{width:260px;height:260px;top:38%;left:-110px;background:#c3d9ef;opacity:.5;animation-delay:-6s;animation-duration:22s}
+.bg-blob.bb3{width:240px;height:240px;bottom:-70px;right:-60px;background:#f3ddba;opacity:.45;animation-delay:-12s;animation-duration:20s}
+@keyframes blobFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(0,-18px,0) scale(1.05)}}
+.bg-chart{position:absolute;left:-12%;bottom:9%;width:124%;height:170px;animation:blobFloat 24s ease-in-out infinite}
+.bg-rings{position:absolute;top:16%;right:-70px;width:210px;height:210px;opacity:.8;animation:orbitSpin 60s linear infinite}
+body.dark .bg-blob{opacity:.22}
+body.dark .bg-chart{opacity:.6}
+@media (prefers-reduced-motion:reduce){.bg-blob,.bg-chart,.bg-rings{animation:none}}

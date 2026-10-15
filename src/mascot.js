@@ -115,9 +115,9 @@ export const EMOTIONS = Object.keys(FACES);
 // Курсич-финансист: та же голова + галстук и монетка.
 export function mascotFinancierSVG() {
   return `<span class="financier">${mascotSVG('proud')}
-    <svg class="fin-tie" viewBox="0 0 100 64" fill="none" aria-hidden="true">
-      <path d="M42 4 h16 l-3 12 h-10 Z" fill="#d33131"/>
-      <path d="M44 16 h12 l6 34 -12 12 -12 -12 Z" fill="#ff4b4b"/>
+    <svg class="fin-tie" viewBox="0 0 100 52" fill="none" aria-hidden="true">
+      <path d="M43 2 h14 l-2.5 10 h-9 Z" fill="#d33131"/>
+      <path d="M45 12 h10 l4.5 24 -9.5 10 -9.5 -10 Z" fill="#ff4b4b"/>
     </svg>
     <span class="fin-coin">₽</span></span>`;
 }
