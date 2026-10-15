@@ -255,7 +255,7 @@ const allLessons = ALL_COURSES.flatMap((co) => co.units.flatMap((u) => u.lessons
 const courseLessons = (co) => co.units.flatMap((u) => u.lessons);
 const courseDone = (co) => courseLessons(co).filter((l) => state.completed[l.id]).length;
 let curCourse = ALL_COURSES[0];
-const doneCount = () => Object.keys(state.completed).length;
+const doneCount = () => allLessons.filter((l) => state.completed[l.id]).length;
 const level = () => Math.floor(state.xp / 100) + 1;
 const firstUndoneIdx = () => allLessons.findIndex((l) => !state.completed[l.id]);
 const isUnlocked = (i) => { const f = firstUndoneIdx(); return f === -1 || i <= f; };
@@ -533,7 +533,8 @@ function pathHtml(course) {
     <h2 class="st" style="margin-top:6px">${course.title}</h2>
     <p class="sub">${dc} из ${flat.length} уроков · уровень ${level()}</p>
     <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (dc / flat.length) * 100)}%"></i></div>
-    ${units}</div>`;
+    ${units}
+    <button class="train-card" data-training="${course.id}"><span class="train-ic">${icon('zap',26)}</span><span class="train-text"><b>Тренировка</b><p>Случайные вопросы из этого курса вперемешку. Повторяй, когда захочешь закрепить.</p></span><span class="chev">›</span></button></div>`;
 }
 
 // ── Профиль / достижения / настройки ───────────────────────────────
@@ -645,7 +646,7 @@ function bindApp() {
     setTimeout(() => egg.classList.remove('play'), 1100);
   };
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
-  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); resetScroll(); });
+  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { if (b.dataset.tab === appTab) return; appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); resetScroll(); });
   app.querySelectorAll('[data-cat]').forEach((b) => b.onclick = () => { catView = b.dataset.cat; haptic('medium'); renderApp(); resetScroll(); });
   const tcar = document.getElementById('topic-carousel');
   if (tcar) tcar.addEventListener('scroll', () => {
@@ -670,6 +671,7 @@ function bindApp() {
     }, 60));
   }
   app.querySelectorAll('[data-lesson]').forEach((b) => b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); });
+  app.querySelectorAll('[data-training]').forEach((b) => b.onclick = () => { haptic('medium'); sfx('open'); startTraining(b.dataset.training); });
   const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); resetScroll(); };
   const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); resetScroll(); };
   const goDict = document.getElementById('go-dict'); if (goDict) goDict.onclick = () => { appTab = 'dict'; haptic(); renderApp(); resetScroll(); };
@@ -704,12 +706,21 @@ let L = null;
 function startLesson(lessonId) {
   const lesson = allLessons.find((l) => l.id === lessonId);
   if (!lesson) return;
+  initLesson(lesson);
+}
+function startTraining(courseId) {
+  const course = ALL_COURSES.find((c) => c.id === courseId);
+  if (!course) return;
+  const pool = courseLessons(course).flatMap((l) => l.quiz).filter((q) => ['single', 'bool', 'dialog', 'case'].includes(q.type));
+  const picked = [...pool].sort(() => Math.random() - 0.5).slice(0, 6);
+  initLesson({ id: 'train-' + course.id, title: 'Тренировка', xp: 5, cards: [], quiz: picked, course, training: true });
+}
+function initLesson(lesson) {
   const steps = [
     ...lesson.cards.map((c, ci) => ({ kind: 'theory', ci, ...c })),
     ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
-    { kind: 'recap' },
   ];
-  const pool = allLessons.filter((x) => x.id !== lesson.id && state.completed[x.id]).flatMap((x) => x.quiz.filter((q) => q.type === 'single' || q.type === 'bool'));
+  const pool = lesson.training ? [] : allLessons.filter((x) => x.id !== lesson.id && lesson.course && x.course && x.course.id === lesson.course.id && state.completed[x.id]).flatMap((x) => x.quiz.filter((q) => q.type === 'single' || q.type === 'bool'));
   if (pool.length) {
     const mq = pool[Math.floor(Date.now() / 1000) % pool.length];
     steps.splice(steps.length - 1, 0, { kind: 'quiz', ...mq, isMix: true, counted: true });

@@ -117,7 +117,7 @@ export function mascotFinancierSVG() {
   return `<span class="financier">${mascotSVG('proud')}
     <svg class="fin-tie" viewBox="0 0 100 52" fill="none" aria-hidden="true">
       <path d="M43 2 h14 l-2.5 10 h-9 Z" fill="#d33131"/>
-      <path d="M45 12 h10 l4.5 24 -9.5 10 -9.5 -10 Z" fill="#ff4b4b"/>
+      <path d="M45 12 h10 l4 17 -9 8 -9 -8 Z" fill="#ff4b4b"/>
     </svg>
     <span class="fin-coin">₽</span></span>`;
 }
