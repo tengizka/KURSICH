@@ -38,7 +38,7 @@ const ABBR_RE = new RegExp('(^|[^А-Яа-яЁёA-Za-z0-9])(' + ABBR_KEYS.join('|
 let lessonSeen = null; // термины, уже подсвеченные в этом уроке
 function seenBefore(key) { if (!lessonSeen) return false; if (lessonSeen.has(key)) return true; lessonSeen.add(key); return false; }
 function abbr(t) {
-  const first = String(t).replace(ABBR_RE, (m, p1, term) => (seenBefore(term) ? p1 + term : p1 + '<span class="abbr" data-t="' + term + '" role="button" aria-label="Что значит ' + term + '">' + term + '</span>'));
+  const first = String(t).replace(ABBR_RE, (m, p1, term) => (seenBefore(term) ? p1 + '<span class="abbr seen" data-t="' + term + '" role="button" aria-label="Что значит ' + term + '">' + term + '</span>' : p1 + '<span class="abbr" data-t="' + term + '" role="button" aria-label="Что значит ' + term + '">' + term + '</span>'));
   return first.split(/(<[^>]+>)/g).map((part) => (part.startsWith('<') ? part : part.replace(TERM_RE, (m, p1, word) => p1 + termSpan(word)))).join('');
 }
 
@@ -90,7 +90,8 @@ const TERM_RE = new RegExp('(^|[^А-Яа-яЁёA-Za-z0-9])(' + TERMS.map((x) => 
 const TERM_TESTS = TERMS.map((x) => ({ name: x.name, re: new RegExp('^(?:' + x.pat + ')$', 'i') }));
 function termSpan(word) {
   const hit = TERM_TESTS.find((x) => x.re.test(word));
-  if (!hit || seenBefore(hit.name)) return word;
+  if (!hit) return word;
+  if (seenBefore(hit.name)) return '<span class="abbr seen" data-t="' + hit.name + '" role="button" aria-label="Что значит: ' + hit.name + '">' + word + '</span>';
   return '<span class="abbr" data-t="' + hit.name + '" role="button" aria-label="Что значит: ' + hit.name + '">' + word + '</span>';
 }
 let abbrPop = null;
