@@ -131,14 +131,21 @@ function renderOnboarding() {
       <div class="ob-mascot">${mascotSVG('idle')}</div>
       <div class="ob-title">Как тебя зовут?</div>
       <p class="ob-text">Так я буду к тебе обращаться.</p>
-      <input class="name-input" id="name-in" maxlength="24" placeholder="Твоё имя" value="${esc(state.name || tgName)}" autocomplete="off">
-      <div class="spacer"></div>
-      <button class="btn" id="ob-name" ${!(state.name || tgName) ? 'disabled' : ''}>Дальше</button>
+      <form id="name-form" style="display:contents">
+        <input class="name-input" id="name-in" maxlength="24" placeholder="Твоё имя" value="${esc(state.name || tgName)}" autocomplete="name" enterkeyhint="done">
+        <div class="spacer"></div>
+        <button class="btn" id="ob-name" type="submit" ${!(state.name || tgName) ? 'disabled' : ''}>Дальше</button>
+      </form>
     </div>`;
     const inp = document.getElementById('name-in'), btn = document.getElementById('ob-name');
+    const form = document.getElementById('name-form');
     inp.addEventListener('input', () => { btn.disabled = !inp.value.trim(); });
-    inp.focus();
-    btn.onclick = () => { state.name = inp.value.trim(); save(); haptic('medium'); tutIdx = 0; flow = 'tutorial'; render(); };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!inp.value.trim()) return;
+      inp.blur();
+      state.name = inp.value.trim(); save(); haptic('medium'); tutIdx = 0; flow = 'tutorial'; render();
+    });
     return;
   }
   // tutorial
@@ -165,7 +172,7 @@ function finishOnboarding() { state.onboarded = true; save(); flow = 'app'; appT
 // ── Каркас приложения ───────────────────────────────
 function topbar() {
   return `<div class="topbar"><div class="logo">курсич</div>
-    <div class="stat"><span class="flame">${icon('flame',18)} <b>${state.streak}</b></span><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><button class="heart stat-btn" data-hearts>${icon('heart',18)} <b>∞</b></button></div></div>`;
+    <div class="stat"><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><button class="heart stat-btn" data-hearts>${icon('heart',18)} <b>∞</b></button></div></div>`;
 }
 function tabbar() {
   const act = (id) => (appTab === id || (id === 'profile' && (appTab === 'ach' || appTab === 'settings')) ? 'active' : '');
@@ -173,6 +180,7 @@ function tabbar() {
     <button class="tab ${act('courses')}" data-tab="courses"><span class="ti">${icon('book',24)}</span>Курсы</button>
     <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">${icon('user',24)}</span>Профиль</button></nav>`;
 }
+function resetScroll() { const sc = document.getElementById('app-scroll') || app; sc.scrollTo(0, 0); }
 function renderApp() {
   applyTheme(); app.classList.remove('in-lesson');
   let html = '';
@@ -180,7 +188,7 @@ function renderApp() {
   else if (appTab === 'profile') html = profileHtml();
   else if (appTab === 'ach') html = achHtml();
   else if (appTab === 'settings') html = settingsHtml();
-  app.innerHTML = topbar() + html + tabbar();
+  app.innerHTML = topbar() + `<div class="app-scroll" id="app-scroll">${html}</div>` + tabbar();
   bindApp();
 }
 
@@ -298,7 +306,7 @@ function profileHtml() {
       ${tgPhoto ? `<img class="tg-avatar" src="${esc(tgPhoto)}" alt="">` : `<div class="tg-initial">${esc((state.name || 'К')[0].toUpperCase())}</div>`}
       <div><div style="font-size:19px;font-weight:900">${esc(state.name) || 'Ученик'}</div>
       <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ${state.xp} XP</div>
-      <div style="font-weight:800;color:var(--muted);font-size:13px">${icon('flame',14)} ${state.streak} дн. · уроков: ${doneCount()}/${totalLessons}</div></div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px">${state.streak} дн. — серия заходов · уроков: ${doneCount()}/${totalLessons}</div></div>
     </div>
     <div class="cardbox" style="padding:4px 16px">
       <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf;color:#b45309">${icon('trophy',22)}</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
@@ -339,15 +347,15 @@ function settingsHtml() {
 
 function bindApp() {
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
-  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); app.scrollTo(0, 0); });
+  app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); resetScroll(); });
   const openFinCat = document.getElementById('open-fin-cat');
-  if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); app.scrollTo(0, 0); };
+  if (openFinCat) openFinCat.onclick = () => { catView = 'finance'; haptic('medium'); renderApp(); resetScroll(); };
   app.querySelectorAll('[data-locked-cat]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_CATS.find((x) => x.id === b.dataset.lockedCat); if (c) showLockedCatModal(c); });
   const openFin = document.getElementById('open-fin');
   if (openFin) openFin.onclick = () => { inPath = true; scrollCurrent = true; haptic('medium'); renderApp(); };
   app.querySelectorAll('[data-locked]').forEach((b) => b.onclick = () => { haptic(); const c = OTHER_COURSES.find((x) => x.id === b.dataset.locked); if (c) showLockedModal(c); });
   const backs = app.querySelectorAll('#back-catalog');
-  backs.forEach((back) => back.onclick = () => { if (inPath) { inPath = false; } else { catView = 'catalog'; } haptic(); renderApp(); app.scrollTo(0, 0); });
+  backs.forEach((back) => back.onclick = () => { if (inPath) { inPath = false; } else { catView = 'catalog'; } haptic(); renderApp(); resetScroll(); });
   if (inPath && scrollCurrent) {
     scrollCurrent = false;
     requestAnimationFrame(() => setTimeout(() => {
@@ -356,9 +364,9 @@ function bindApp() {
     }, 60));
   }
   app.querySelectorAll('[data-lesson]').forEach((b) => b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); });
-  const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); app.scrollTo(0, 0); };
-  const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); app.scrollTo(0, 0); };
-  app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); app.scrollTo(0, 0); });
+  const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); resetScroll(); };
+  const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); resetScroll(); };
+  app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); resetScroll(); });
   const nameIn = document.getElementById('set-name');
   if (nameIn) nameIn.addEventListener('change', () => { state.name = nameIn.value.trim(); save(); toast('Имя сохранено'); });
   const darkIn = document.getElementById('set-dark');
@@ -366,7 +374,7 @@ function bindApp() {
   const soundIn = document.getElementById('set-sound');
   if (soundIn) soundIn.addEventListener('change', () => { state.sound = soundIn.checked; save(); if (state.sound) beep(true); });
   const redo = document.getElementById('redo-ob');
-  if (redo) redo.onclick = () => { state.onboarded = false; save(); flow = 'splash'; render(); app.scrollTo(0, 0); };
+  if (redo) redo.onclick = () => { state.onboarded = false; save(); flow = 'splash'; render(); resetScroll(); };
   const reset = document.getElementById('reset-all');
   if (reset) reset.onclick = () => {
     if (confirm('Сбросить прогресс, XP и достижения?')) {
@@ -418,7 +426,7 @@ function renderLesson() {
       ${L.lesson.cards.map((c, i) => { const short = (c.b.split(/(?<=\.)\s/)[0] || c.b); return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${c.t}</b><p>${short}</p></div></div>`; }).join('')}
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
   }
-  app.innerHTML = `<div style="max-width:480px;margin:0 auto">
+  app.innerHTML = `<div class="lesson-shell">
     <div class="lesson-head"><button class="xclose" id="lx">✕</button>
       <div class="bar lbar"><i style="width:${progress}%;background:linear-gradient(90deg,#58cc02,#8ee000)"></i></div>
       <button class="hearts-live" data-hearts>${icon('heart',19)} ∞</button></div>
@@ -460,7 +468,7 @@ function advance() {
   L.idx++;
   if (L.idx >= L.steps.length) return finishLesson();
   L.selected = null; L.checked = false;
-  renderLesson(); app.scrollTo(0, 0);
+  renderLesson(); resetScroll();
 }
 function finishLesson() {
   app.classList.add('in-lesson');
@@ -471,7 +479,7 @@ function finishLesson() {
   const xpGain = firstTime ? Math.round(lesson.xp * (0.5 + 0.5 * acc)) + (acc === 1 ? 5 : 0) : 2;
   state.xp += xpGain; save();
   const perfect = acc === 1;
-  app.innerHTML = `<div style="max-width:480px;margin:0 auto"><div class="result">
+  app.innerHTML = `<div class="app-scroll"><div class="result">
     <div class="mwrap">${mascotSVG('proud')}</div>
     <div class="big-xp">+${xpGain} XP</div>
     <h2 style="margin:0;font-size:23px;font-weight:900">${perfect ? 'Всё верно!' : 'Урок пройден'}</h2>

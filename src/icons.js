@@ -75,4 +75,4 @@ export const LESSON_ICON = {
 };
 export const UNIT_ICON = { u1: 'compass', u2: 'landmark', u3: 'lifebuoy', u4: 'sprout', u5: 'calculator', u6: 'shield' };
 export const COURSE_ICON = { 'finlit-2026': 'wallet', 'invest-pro': 'trending', 'career': 'briefcase', 'flat': 'home', 'crypto': 'coins', 'business': 'bulb' };
-export const ACH_ICON = { first: 'star', five: 'flame', perfect: 'gem', rich: 'wallet', half: 'flag', ninja: 'zap', grad: 'grad', streak3: 'zap' };
+export const ACH_ICON = { first: 'star', five: 'flag', perfect: 'gem', rich: 'wallet', half: 'flag', ninja: 'zap', grad: 'grad', streak3: 'zap' };

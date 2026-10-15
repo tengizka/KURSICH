@@ -398,3 +398,13 @@ body.dark .node{box-shadow:inset 0 -7px 0 rgba(0,0,0,.25),inset 0 5px 0 rgba(255
 /* Без тени под иллюстрациями */
 .node-art svg,.tile-art svg,.theory-visual svg,.path-art svg,.unit-art svg,.small-art svg{filter:none}
 .tile-art,.theory-visual,.unit-art,.cat-art,.path-art{filter:none}
+
+/* ── Статичная оболочка приложения ─────────────────────────── */
+#app{display:flex;flex-direction:column;overflow:hidden}
+.topbar{flex:none;position:relative;top:auto}
+.app-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch;position:relative}
+.tabbar{position:relative;left:auto;bottom:auto;transform:none;width:100%;flex:none}
+.onboard{flex:1;min-height:0}
+.lesson-shell{display:flex;flex-direction:column;height:100%;width:100%;max-width:480px;margin:0 auto}
+.lesson-head{flex:none;position:relative;top:auto}
+.lesson-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
