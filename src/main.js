@@ -1,6 +1,6 @@
 import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
-import { mascotSVG, mascotFinancierSVG } from './mascot.js';
+import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG } from './mascot.js';
 import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 
@@ -133,10 +133,10 @@ function renderOnboarding() {
     app.innerHTML = `<div class="intro-screen">
       <div class="intro-wave w1"></div><div class="intro-wave w2"></div>
       <div class="intro-content">
-        <div class="intro-mascot">${mascotSVG('happy')}</div>
+        <div class="intro-mascot curls">${mascotCurlsSVG()}</div>
         <div class="intro-word">${letters}</div>
-        <div class="intro-made">made tengizka</div>
       </div>
+      <div class="intro-made">made tengizka</div>
     </div>`;
     if (!introTimer) {
       introTimer = setTimeout(() => {
@@ -151,7 +151,7 @@ function renderOnboarding() {
   if (flow === 'splash') {
     app.innerHTML = `<div class="onboard splash">
       <div class="spacer"></div>
-      <div class="splash-mascot">${mascotSVG('celebrate')}</div>
+      <div class="splash-mascot curls">${mascotCurlsSVG()}</div>
       <div class="wordmark">курсич</div>
       <div class="splash-tag">Короткие уроки. По пять минут в день.</div>
       <button class="btn white" id="ob-start">Начать</button>

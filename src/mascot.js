@@ -109,3 +109,22 @@ export function mascotFinancierSVG() {
     </svg>
     <span class="fin-coin">₽</span></span>`;
 }
+
+// Только кудри — для заставки.
+export function mascotCurlsSVG() {
+  return `<svg class="mascot-svg" viewBox="0 25 220 95" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Кудри Курсича">
+    <g class="m-hair">
+      <g fill="#17120e">
+        <circle cx="63" cy="67" r="14.5"/><circle cx="79" cy="53" r="16.5"/><circle cx="99" cy="45" r="17.5"/>
+        <circle cx="121" cy="45" r="16.5"/><circle cx="141" cy="53" r="15.5"/><circle cx="156" cy="67" r="13.5"/>
+        <circle cx="55" cy="84" r="11.5"/><circle cx="165" cy="84" r="11.5"/>
+      </g>
+      <g fill="#241c16">
+        <circle cx="87" cy="59" r="12.5"/><circle cx="110" cy="55" r="13.5"/><circle cx="132" cy="59" r="11.5"/>
+        <circle cx="73" cy="71" r="8.5"/><circle cx="147" cy="71" r="8.5"/><circle cx="104" cy="41" r="8.5"/>
+      </g>
+      <path d="M84 49 Q92 43 100 48" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <path d="M122 47 Q130 42 137 47" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>`;
+}

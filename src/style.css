@@ -459,3 +459,18 @@ button.is-pressed{filter:brightness(.95)}
 .hearts-live.is-pressed{transform:scale(.9)}
 .xclose.is-pressed{transform:scale(.85);color:var(--red)}
 .feedback .btn.is-pressed{transform:translateY(5px)}
+
+/* Заставка: кудри и подпись внизу экрана */
+.intro-mascot.curls{width:150px}
+.splash-mascot.curls{width:min(58vw,230px)}
+.intro-made{position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom, 0px));text-align:center;z-index:2;margin:0}
+
+/* Урок: всё на одном экране, без прокрутки */
+.lesson-body{display:flex;flex-direction:column;overflow:hidden;padding-top:4px}
+.lesson-body .mascot-row{flex:none;margin:6px 0 12px}
+.lesson-body .q-mascot{width:66px}
+.lesson-body #opts{display:flex;flex-direction:column;gap:10px;min-height:0}
+.lesson-body .opt{margin-bottom:0;padding:13px 15px;font-size:15px}
+.lesson-body .sticky-cta{position:static;flex:none;margin-top:auto;padding-top:12px}
+.lesson-body .theory-visual{width:104px;height:104px;margin:8px auto 2px}
+.lesson-body .recap-item{padding:11px 13px;margin-bottom:9px}
