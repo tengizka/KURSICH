@@ -74,7 +74,7 @@ export const OUTFITS = {
 export function mascotSVG(emotion = 'idle', outfit = 'none') {
   const f = FACES[emotion] || FACES.idle;
   return `
-  <svg class="mascot-svg ${extraClass}" viewBox="0 22 220 142" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич">
+  <svg class="mascot-svg" viewBox="0 22 220 142" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич">
     <g class="m-head">
       <circle cx="57" cy="107" r="9.5" fill="#ffd3a6"/><circle cx="163" cy="107" r="9.5" fill="#ffd3a6"/>
       <ellipse cx="110" cy="105" rx="53" ry="49" fill="#ffd3a6"/>
