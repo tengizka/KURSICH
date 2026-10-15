@@ -112,23 +112,19 @@ export function mascotFinancierSVG() {
 
 // Только кудри — для заставки.
 export function mascotCurlsSVG() {
-  return `<svg class="mascot-svg" viewBox="0 25 220 95" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Кудри Курсича">
+  return `<svg class="mascot-svg" viewBox="38 20 144 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Кудри Курсича">
     <g class="m-hair">
+      <ellipse cx="110" cy="68" rx="62" ry="36" fill="#17120e"/>
       <g fill="#17120e">
-        <circle cx="63" cy="67" r="14.5"/><circle cx="79" cy="53" r="16.5"/><circle cx="99" cy="45" r="17.5"/>
-        <circle cx="121" cy="45" r="16.5"/><circle cx="141" cy="53" r="15.5"/><circle cx="156" cy="67" r="13.5"/>
-        <circle cx="55" cy="84" r="11.5"/><circle cx="165" cy="84" r="11.5"/>
+        <circle cx="58" cy="56" r="16"/><circle cx="80" cy="42" r="18"/><circle cx="104" cy="37" r="19"/>
+        <circle cx="128" cy="41" r="17"/><circle cx="150" cy="52" r="15"/><circle cx="164" cy="68" r="13"/>
+        <circle cx="50" cy="74" r="13"/>
+        <circle cx="62" cy="94" r="10"/><circle cx="80" cy="98" r="10"/><circle cx="98" cy="99" r="10"/>
+        <circle cx="116" cy="99" r="10"/><circle cx="134" cy="98" r="10"/><circle cx="152" cy="94" r="10"/>
       </g>
-      <g fill="#241c16">
-        <circle cx="87" cy="59" r="12.5"/><circle cx="110" cy="55" r="13.5"/><circle cx="132" cy="59" r="11.5"/>
-        <circle cx="73" cy="71" r="8.5"/><circle cx="147" cy="71" r="8.5"/><circle cx="104" cy="41" r="8.5"/>
-      </g>
-      <path d="M84 49 Q92 43 100 48" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <path d="M122 47 Q130 42 137 47" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-      <g fill="#17120e"><circle cx="68" cy="90" r="10"/><circle cx="86" cy="94" r="10"/><circle cx="104" cy="95" r="10"/><circle cx="122" cy="95" r="10"/><circle cx="140" cy="94" r="10"/><circle cx="156" cy="90" r="10"/></g>
-      <g stroke="#5a4a3d" stroke-width="2.6" fill="none" stroke-linecap="round">
-        <path d="M62 78a7 7 0 1 1 7 7"/><path d="M88 66a7 7 0 1 1 7 7"/><path d="M112 62a7 7 0 1 1 7 7"/>
-        <path d="M136 66a7 7 0 1 1 7 7"/><path d="M84 84a6 6 0 1 1 6 6"/><path d="M124 84a6 6 0 1 1 6 6"/>
+      <g stroke="#5a4a3d" stroke-width="2.8" fill="none" stroke-linecap="round">
+        <path d="M68 62a8 8 0 1 1 8 8"/><path d="M97 52a8 8 0 1 1 8 8"/>
+        <path d="M126 56a8 8 0 1 1 8 8"/><path d="M146 72a7 7 0 1 1 7 7"/>
       </g>
     </g>
   </svg>`;
