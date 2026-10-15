@@ -35,8 +35,10 @@ const GLOSSARY = {
 };
 const ABBR_KEYS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
 const ABBR_RE = new RegExp('(^|[^А-Яа-яЁёA-Za-z0-9])(' + ABBR_KEYS.join('|') + ')(?![А-Яа-яЁёA-Za-z0-9])', 'g');
+let lessonSeen = null; // термины, уже подсвеченные в этом уроке
+function seenBefore(key) { if (!lessonSeen) return false; if (lessonSeen.has(key)) return true; lessonSeen.add(key); return false; }
 function abbr(t) {
-  const first = String(t).replace(ABBR_RE, (m, p1, term) => p1 + '<span class="abbr" data-t="' + term + '" role="button" aria-label="Что значит ' + term + '">' + term + '</span>');
+  const first = String(t).replace(ABBR_RE, (m, p1, term) => (seenBefore(term) ? p1 + term : p1 + '<span class="abbr" data-t="' + term + '" role="button" aria-label="Что значит ' + term + '">' + term + '</span>'));
   return first.split(/(<[^>]+>)/g).map((part) => (part.startsWith('<') ? part : part.replace(TERM_RE, (m, p1, word) => p1 + termSpan(word)))).join('');
 }
 
@@ -88,7 +90,7 @@ const TERM_RE = new RegExp('(^|[^А-Яа-яЁёA-Za-z0-9])(' + TERMS.map((x) => 
 const TERM_TESTS = TERMS.map((x) => ({ name: x.name, re: new RegExp('^(?:' + x.pat + ')$', 'i') }));
 function termSpan(word) {
   const hit = TERM_TESTS.find((x) => x.re.test(word));
-  if (!hit) return word;
+  if (!hit || seenBefore(hit.name)) return word;
   return '<span class="abbr" data-t="' + hit.name + '" role="button" aria-label="Что значит: ' + hit.name + '">' + word + '</span>';
 }
 let abbrPop = null;
@@ -347,7 +349,7 @@ function topbar() {
     <div class="stat"><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><button class="heart stat-btn" data-hearts>${icon('heart',18)} <b>∞</b></button></div></div>`;
 }
 function tabbar() {
-  const act = (id) => (appTab === id || (id === 'profile' && (appTab === 'ach' || appTab === 'settings')) ? 'active' : '');
+  const act = (id) => (appTab === id || (id === 'profile' && (appTab === 'ach' || appTab === 'settings' || appTab === 'dict')) ? 'active' : '');
   return `<nav class="tabbar">
     <button class="tab ${act('courses')}" data-tab="courses"><span class="ti">${icon('book',24)}</span>Курсы</button>
     <button class="tab ${act('profile')}" data-tab="profile"><span class="ti">${icon('user',24)}</span>Профиль</button></nav>`;
@@ -360,6 +362,7 @@ function renderApp() {
   else if (appTab === 'profile') html = profileHtml();
   else if (appTab === 'ach') html = achHtml();
   else if (appTab === 'settings') html = settingsHtml();
+  else if (appTab === 'dict') html = dictHtml();
   app.innerHTML = topbar() + `<div class="app-scroll" id="app-scroll">${html}</div>` + tabbar();
   bindApp();
 }
@@ -459,7 +462,7 @@ function pathHtml() {
     }).join('');
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
     return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${icon(UNIT_ICON[u.id] || 'book',32)}</div>
-      <div><h2>${abbr(u.title)}</h2><p>${abbr(u.desc)}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
+      <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
       <div class="path">${trail}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
   }).join('');
   return `<div class="screen" style="padding-top:10px">
@@ -481,6 +484,7 @@ function profileHtml() {
       <div style="font-weight:800;color:var(--muted);font-size:13px">Уроков пройдено: ${doneCount()} из ${totalLessons}</div></div>
     </div>
     <div class="cardbox" style="padding:4px 16px">
+      <button class="menu-row" id="go-dict"><span class="mi" style="background:#ddf4ff;color:#1899d6">${icon('book',22)}</span>Словарь терминов<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">если забыл слово</span><span class="chev">›</span></button>
       <button class="menu-row" id="go-ach"><span class="mi" style="background:#fff3cf;color:#b45309">${icon('trophy',22)}</span>Достижения<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">${got}/${ACHIEVEMENTS.length}</span><span class="chev">›</span></button>
       <button class="menu-row" id="go-settings"><span class="mi" style="background:#eef2f5;color:#52616b">${icon('sliders',22)}</span>Настройки<span class="chev">›</span></button>
     </div>
@@ -517,6 +521,22 @@ function settingsHtml() {
   </div>`;
 }
 
+function dictHtml() {
+  const items = [
+    ...Object.entries(GLOSSARY).filter(([k]) => k !== 'QR').map(([name, g]) => ({ name, full: g.full, text: g.text })),
+    ...Object.entries(TERM_MAP).map(([name, g]) => ({ name, full: g.full, text: g.text })),
+  ].sort((x, y) => x.name.localeCompare(y.name, 'ru'));
+  return `<div class="screen">
+    <button class="menu-row" data-back-profile style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Профиль</button>
+    <h2 class="st">Словарь</h2>
+    <p class="sub" style="margin-top:-6px">Забыл слово из урока — найди его здесь. В самих уроках слова подчёркиваются только при первой встрече.</p>
+    <input class="name-input dict-search" id="dict-search" type="text" placeholder="Найти слово…" autocomplete="off">
+    <div class="cardbox" style="padding:4px 16px;margin-top:14px">
+      ${items.map((it) => `<div class="dict-item" data-s="${(it.name + ' ' + it.full + ' ' + it.text).toLowerCase()}"><div class="dict-term">${it.name}</div><div class="dict-full">${it.full}</div><p>${it.text}</p></div>`).join('')}
+      <div class="dict-item" id="dict-empty" style="display:none;text-align:center;color:var(--muted);font-weight:800">Такого слова пока нет 🤔</div>
+    </div></div>`;
+}
+
 function bindApp() {
   const egg = document.getElementById('logo-egg');
   if (egg) egg.onclick = () => {
@@ -544,6 +564,13 @@ function bindApp() {
   app.querySelectorAll('[data-lesson]').forEach((b) => b.onclick = () => { haptic('medium'); startLesson(b.dataset.lesson); });
   const goAch = document.getElementById('go-ach'); if (goAch) goAch.onclick = () => { appTab = 'ach'; haptic(); renderApp(); resetScroll(); };
   const goSet = document.getElementById('go-settings'); if (goSet) goSet.onclick = () => { appTab = 'settings'; haptic(); renderApp(); resetScroll(); };
+  const goDict = document.getElementById('go-dict'); if (goDict) goDict.onclick = () => { appTab = 'dict'; haptic(); renderApp(); resetScroll(); };
+  const ds = document.getElementById('dict-search');
+  if (ds) ds.addEventListener('input', () => {
+    const v = ds.value.trim().toLowerCase(); let any = false;
+    app.querySelectorAll('.dict-item[data-s]').forEach((it) => { const show = !v || it.dataset.s.includes(v); it.style.display = show ? '' : 'none'; if (show) any = true; });
+    const e = document.getElementById('dict-empty'); if (e) e.style.display = any ? 'none' : '';
+  });
   app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); resetScroll(); });
   const nameIn = document.getElementById('set-name');
   if (nameIn) nameIn.addEventListener('change', () => { state.name = nameIn.value.trim(); save(); toast('Имя сохранено'); });
@@ -575,11 +602,12 @@ function startLesson(lessonId) {
   ];
   steps.forEach((st, i) => { st.uid = i; });
   L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false, pendingRepeat: false };
+  lessonSeen = new Set();
   sfx('open');
   try { tg?.BackButton?.show(); tg.BackButton.onClick(exitLesson); } catch (e) {}
   renderLesson();
 }
-function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; scrollCurrent = true; render(); }
+function exitLesson() { L = null; lessonSeen = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; scrollCurrent = true; render(); }
 
 function renderLesson() {
   hideAbbr();
@@ -661,7 +689,7 @@ function checkAnswer() {
   const fb = document.createElement('div');
   fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
   fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(ok ? 'happy' : 'oops')}</div>
-    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${abbr(step.explain)}${ok ? '' : '<br><b>Вернёмся к этому вопросу в конце урока.</b>'}</p>
+    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${abbr(step.explain)}</p>
     <button class="btn ${ok ? '' : 'red'}" id="fb-next">Дальше</button>`;
   document.body.appendChild(fb);
   document.getElementById('fb-next').onclick = () => {

@@ -517,3 +517,12 @@ body.dark .abbr:active{background:#17384d}
 @keyframes floatObj{0%,100%{transform:translate3d(0,0,0) rotate(-3deg)}50%{transform:translate3d(0,-16px,0) rotate(3.5deg)}}
 body.dark #bg-scene{opacity:.34}
 @media (prefers-reduced-motion:reduce){.bg-obj{animation:none}}
+
+/* Словарь */
+.dict-search{text-align:left;margin-top:10px;background:#fff}
+body.dark .dict-search{background:#1d251f}
+.dict-item{padding:12px 2px;border-bottom:2px solid var(--line)}
+.dict-item:last-child{border-bottom:none}
+.dict-term{color:#1899d6;font-weight:900;font-size:17px}
+.dict-full{font-weight:800;font-size:14.5px;margin-top:1px}
+.dict-item p{margin:4px 0 0;color:var(--muted);font-weight:600;font-size:13.5px;line-height:1.45}
