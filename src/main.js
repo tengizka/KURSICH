@@ -192,7 +192,7 @@ function finishOnboarding() { state.onboarded = true; save(); flow = 'app'; appT
 
 // ── Каркас приложения ───────────────────────────────
 function topbar() {
-  return `<div class="topbar"><div class="logo">курсич</div>
+  return `<div class="topbar"><button class="logo" id="logo-egg" aria-label="курсич">${'курсич'.split('').map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</button>
     <div class="stat"><span class="gem">${icon('star',18)} <b>${state.xp}</b></span><button class="heart stat-btn" data-hearts>${icon('heart',18)} <b>∞</b></button></div></div>`;
 }
 function tabbar() {
@@ -367,6 +367,12 @@ function settingsHtml() {
 }
 
 function bindApp() {
+  const egg = document.getElementById('logo-egg');
+  if (egg) egg.onclick = () => {
+    egg.classList.remove('play'); void egg.offsetWidth; egg.classList.add('play');
+    haptic('medium');
+    setTimeout(() => egg.classList.remove('play'), 1100);
+  };
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
   app.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { appTab = b.dataset.tab; if (appTab === 'courses') inPath = inPath && false; haptic(); renderApp(); resetScroll(); });
   const openFinCat = document.getElementById('open-fin-cat');

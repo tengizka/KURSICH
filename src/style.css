@@ -422,3 +422,26 @@ body.dark .node{box-shadow:inset 0 -7px 0 rgba(0,0,0,.25),inset 0 5px 0 rgba(255
 @keyframes letterPop{0%{opacity:0;transform:translateY(26px) scale(.6) rotate(-6deg)}70%{opacity:1;transform:translateY(-4px) scale(1.08)}100%{opacity:1;transform:none}}
 .intro-made{margin-top:10px;font-size:14px;font-weight:800;letter-spacing:2.5px;color:#374151;opacity:0;animation:madeFade .6s 1.5s ease forwards;text-transform:lowercase}
 @keyframes madeFade{from{opacity:0;transform:translateY(8px)}to{opacity:.9;transform:none}}
+
+/* Пустого поля под меню больше нет */
+#app{padding-bottom:0}
+.tabbar{padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px))}
+
+/* Пасхалка: буквы логотипа прыгают и подмигивают */
+.logo{display:flex;gap:0;padding:2px 0;background:none;line-height:1}
+.logo span{display:inline-block;transform-origin:50% 100%}
+.logo.play span{animation:logoJump .55s calc(var(--i)*55ms) cubic-bezier(.2,.9,.3,1.4)}
+.logo.play span:nth-child(4){animation:logoJump .55s calc(var(--i)*55ms) cubic-bezier(.2,.9,.3,1.4),logoWink .55s calc(var(--i)*55ms + 120ms) ease}
+@keyframes logoJump{0%{transform:translateY(0) scale(1,1)}35%{transform:translateY(-11px) scale(.94,1.08) rotate(-4deg)}65%{transform:translateY(1px) scale(1.08,.9)}100%{transform:none}}
+@keyframes logoWink{0%,100%{scale:1 1}45%{scale:1 .25}}
+
+/* Мобильная скорость: анимации только transform/opacity, тяжёлое — в композит */
+.mascot-svg,.intro-wave,.node,.splash-mascot,.ob-mascot{will-change:transform}
+.app-scroll,.lesson-body{scrollbar-width:none}
+.app-scroll::-webkit-scrollbar,.lesson-body::-webkit-scrollbar{width:0;height:0}
+.path{content-visibility:auto;contain-intrinsic-size:auto 720px}
+.course-tile,.cat-card,.cardbox{contain:layout paint}
+@media (max-width:520px){
+  .cardbox,.course-tile,.cat-card{box-shadow:0 3px 0 rgba(84,110,84,.10)}
+  .unit-banner{box-shadow:0 5px 0 rgba(0,0,0,.13)}
+}
