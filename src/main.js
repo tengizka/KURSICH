@@ -5,6 +5,69 @@ import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART, GRACE_ART } from 
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
 import curlsUrl from './assets/curls.png';
 
+// ── Словарик сокращений: пунктирная подсказка-облачко ──
+const GLOSSARY = {
+  'ИИС-3': { full: 'Индивидуальный инвестиционный счёт (третий тип)', text: 'Особый счёт для инвестиций. Государство возвращает часть налога, но деньги лежат минимум 5 лет.' },
+  'ИИС': { full: 'Индивидуальный инвестиционный счёт', text: 'Особый счёт для инвестиций с подарком от государства — возвратом части налога.' },
+  'НДФЛ': { full: 'Налог на доходы физических лиц', text: 'Налог, который берут с твоих доходов: зарплаты, продажи и прочего заработка.' },
+  'ПСК': { full: 'Полная стоимость кредита', text: 'Сколько отдашь банку сверху на самом деле: проценты, страховки и все сборы вместе.' },
+  'БКИ': { full: 'Бюро кредитных историй', text: 'Организации, где хранится досье о твоих кредитах: что брал и как платил.' },
+  'БПИФ': { full: 'Биржевой паевой инвестиционный фонд', text: 'Готовая корзина из многих компаний. Покупается на бирже одной сделкой.' },
+  'АСВ': { full: 'Агентство по страхованию вкладов', text: 'Через него государство возвращает вклады, если банк закрылся. До 1,4 млн ₽ в одном банке.' },
+  'СФР': { full: 'Социальный фонд России', text: 'Государственный фонд, который собирает взносы и платит пенсии.' },
+  'НПД': { full: 'Налог на профессиональный доход', text: 'Маленький налог самозанятых: 4% с денег от людей и 6% — от фирм.' },
+  'ПДС': { full: 'Программа долгосрочных сбережений', text: 'Копишь долго сам, а государство докладывает до 36 000 ₽ в год.' },
+  'ОФЗ': { full: 'Облигации федерального займа', text: 'Государство берёт деньги в долг у людей и платит за это проценты.' },
+  'НПФ': { full: 'Негосударственный пенсионный фонд', text: 'Фонд, где копятся деньги на будущую пенсию.' },
+  'СБП': { full: 'Система быстрых платежей', text: 'Переводы по номеру телефона. Быстро и обычно без комиссии.' },
+  'МФЦ': { full: 'Многофункциональный центр', text: '«Мои документы»: госуслуги вживую, помогают с бумагами бесплатно.' },
+  'МФО': { full: 'Микрофинансовая организация', text: 'Даёт маленькие займы «до зарплаты», но очень дорого. Осторожно.' },
+  'ГПХ': { full: 'Договор гражданско-правового характера', text: 'Договор на конкретную работу или услугу, когда тебя не берут в штат.' },
+  'ОСНО': { full: 'Общая система налогообложения', text: 'Обычные налоги для бизнеса, без льготных режимов.' },
+  'ИП': { full: 'Индивидуальный предприниматель', text: 'Человек, который официально открыл своё маленькое дело.' },
+  'ЦБ': { full: 'Центральный банк (Банк России)', text: 'Главный банк страны. Следит за банками и ценами и решает, какая будет ключевая ставка.' },
+  'QR-код': { full: 'QR — Quick Response, «быстрый отклик»', text: 'Квадратный код: навёл камеру — оплатил или перешёл по ссылке.' },
+  'QR': { full: 'QR — Quick Response, «быстрый отклик»', text: 'Квадратный код: навёл камеру — оплатил или перешёл по ссылке. Проверяй, не наклеен ли поверх настоящего.' },
+  '2FA': { full: 'Двухфакторная аутентификация', text: 'Двойная защита входа: пароль плюс код из сообщения или приложения.' },
+  'СМС': { full: 'Короткое текстовое сообщение', text: 'Банк присылает в нём коды. Код из СМС никому не называй — даже «сотруднику банка».' },
+  'ФИО': { full: 'Фамилия, имя, отчество', text: 'Полное имя человека по документам.' },
+  'Минфин': { full: 'Министерство финансов', text: 'Ведомство, которое отвечает за деньги государства.' },
+};
+const ABBR_KEYS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+const ABBR_RE = new RegExp('(^|[^А-Яа-яЁёA-Za-z0-9])(' + ABBR_KEYS.join('|') + ')(?![А-Яа-яЁёA-Za-z0-9])', 'g');
+function abbr(t) {
+  return String(t).replace(ABBR_RE, (m, p1, term) => p1 + '<span class="abbr" data-t="' + term + '" role="button" aria-label="Что значит ' + term + '">' + term + '</span>');
+}
+let abbrPop = null;
+function hideAbbr() { if (abbrPop) { abbrPop.remove(); abbrPop = null; } }
+function showAbbr(el) {
+  const term = el.dataset.t; const g = GLOSSARY[term]; if (!g) return;
+  const same = abbrPop && abbrPop.dataset.term === term;
+  hideAbbr(); if (same) return;
+  abbrPop = document.createElement('div');
+  abbrPop.id = 'abbr-pop'; abbrPop.dataset.term = term;
+  abbrPop.innerHTML = '<div class="abbr-pop-t">' + term + '</div><div class="abbr-pop-f">' + g.full + '</div><p>' + g.text + '</p>';
+  document.body.appendChild(abbrPop);
+  const r = el.getBoundingClientRect();
+  const w = Math.min(300, window.innerWidth - 24);
+  abbrPop.style.width = w + 'px';
+  const h = abbrPop.offsetHeight;
+  const left = Math.min(Math.max(12, r.left + r.width / 2 - w / 2), window.innerWidth - w - 12);
+  let top = r.top - h - 14;
+  if (top < 76) { top = r.bottom + 14; abbrPop.classList.add('below'); }
+  abbrPop.style.left = left + 'px'; abbrPop.style.top = top + 'px';
+  abbrPop.style.setProperty('--tail', Math.min(Math.max(20, r.left + r.width / 2 - left - 8), w - 36) + 'px');
+  requestAnimationFrame(() => abbrPop && abbrPop.classList.add('show'));
+  try { sfx('pop'); } catch (e) {}
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('.abbr');
+  if (a) { e.preventDefault(); e.stopPropagation(); showAbbr(a); return; }
+  if (abbrPop && !(e.target.closest && e.target.closest('#abbr-pop'))) hideAbbr();
+}, true);
+window.addEventListener('scroll', hideAbbr, { capture: true, passive: true });
+
+
 // ── Telegram ───────────────────────────────
 const tg = window.Telegram?.WebApp;
 // Статичное приложение: фиксируем экран, запрещаем сворачивание свайпом.
@@ -140,6 +203,7 @@ let scrollCurrent = false;
 
 function applyTheme() { document.body.classList.toggle('dark', !!state.dark); }
 function render() {
+  hideAbbr();
   applyTheme();
   document.querySelectorAll('.feedback,.modal-back').forEach((e) => e.remove());
   if (flow !== 'app') return renderOnboarding();
@@ -342,7 +406,7 @@ function pathHtml() {
     }).join('');
     const ud = u.lessons.filter((l) => state.completed[l.id]).length;
     return `<div class="unit-banner" style="background:${u.color}"><div class="uicon">${icon(UNIT_ICON[u.id] || 'book',32)}</div>
-      <div><h2>${u.title}</h2><p>${u.desc}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
+      <div><h2>${abbr(u.title)}</h2><p>${abbr(u.desc)}</p></div><div class="ubadge">${ud}/${u.lessons.length}</div></div>
       <div class="path">${trail}<div class="path-art">${UNIT_ART[u.id]}</div>${nodes}</div>`;
   }).join('');
   return `<div class="screen" style="padding-top:10px">
@@ -465,6 +529,7 @@ function startLesson(lessonId) {
 function exitLesson() { L = null; try { tg?.BackButton?.hide(); } catch (e) {} appTab = 'courses'; inPath = true; scrollCurrent = true; render(); }
 
 function renderLesson() {
+  hideAbbr();
   app.classList.add('in-lesson');
   const step = L.steps[L.idx];
   const progress = Math.round((L.idx / L.steps.length) * 100);
@@ -473,7 +538,7 @@ function renderLesson() {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'theory').length;
     body = `<span class="phase-tag theory">${icon('book',16)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
       <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
-        <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
+        <div class="bubble"><b>${abbr(step.t)}</b><br>${abbr(step.b)}</div></div>
       <div class="theory-visual">${step.ci >= 2 ? GRACE_ART : ((step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || '')}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
@@ -482,13 +547,13 @@ function renderLesson() {
       ? `<span class="phase-tag recap">${icon('history',16)} Повторим — было с ошибкой</span>`
       : `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>`)
       + `<div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('idle')}</div>
-        <div class="bubble" style="font-size:17px"><b>${step.q}</b></div></div>
-      <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
+        <div class="bubble" style="font-size:17px"><b>${abbr(step.q)}</b></div></div>
+      <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${abbr(o)}</button>`).join('')}</div>
       <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
   } else { // recap
     body = `<span class="phase-tag recap">${icon('target',16)} Закрепим</span>
       <h2 style="margin-top:14px">Главное из урока</h2>
-      ${L.lesson.cards.map((c, i) => { const parts = c.b.split(/(?<=\.)\s/).filter(Boolean); const short = parts.length > 1 ? parts[1] : parts[0]; return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${c.t}</b><p>${short}</p></div></div>`; }).join('')}
+      ${L.lesson.cards.map((c, i) => { const parts = c.b.split(/(?<=\.)\s/).filter(Boolean); const short = parts.length > 1 ? parts[1] : parts[0]; return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${abbr(c.t)}</b><p>${abbr(short)}</p></div></div>`; }).join('')}
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
   }
   app.innerHTML = `<div class="lesson-shell">
@@ -543,7 +608,7 @@ function checkAnswer() {
   const fb = document.createElement('div');
   fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
   fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(ok ? 'happy' : 'oops')}</div>
-    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${step.explain}${ok ? '' : '<br><b>Вернёмся к этому вопросу в конце урока.</b>'}</p>
+    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${abbr(step.explain)}${ok ? '' : '<br><b>Вернёмся к этому вопросу в конце урока.</b>'}</p>
     <button class="btn ${ok ? '' : 'red'}" id="fb-next">Дальше</button>`;
   document.body.appendChild(fb);
   document.getElementById('fb-next').onclick = () => {
