@@ -486,3 +486,4 @@ button.is-pressed{filter:brightness(.95)}
 .intro-word{font-size:min(19vw,74px);text-shadow:0 5px 0 rgba(43,105,3,.45)}
 .splash-mascot.curls{width:min(72vw,280px);margin-bottom:-16px}
 .onboard.splash .wordmark{font-size:min(17vw,60px);text-shadow:0 4px 0 rgba(43,105,3,.40);margin-top:0}
+.curls-img{display:block;width:100%;height:auto}
