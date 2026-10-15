@@ -64,18 +64,38 @@ function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
     state.lastDay = t; state.hearts = 5; save();
   }
 })();
-// Короткий звук — только если включён в настройках. Музыки в приложении нет.
+// ── Звуки: синтезатор, без файлов. Работает, если звук включён в настройках ──
 let audioCtx = null;
-function beep(ok) {
+function tone(freq, delay = 0, dur = 0.16, type = 'sine', vol = 0.09, slideTo = null) {
+  const t0 = audioCtx.currentTime + delay;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t0);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function sfx(name) {
   if (!state.sound) return;
   try {
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.connect(g); g.connect(audioCtx.destination);
-    o.frequency.value = ok ? 880 : 220; g.gain.value = 0.06;
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18); o.stop(audioCtx.currentTime + 0.2);
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (name === 'click') { tone(620, 0, 0.07, 'triangle', 0.05); }
+    else if (name === 'pop') { tone(420, 0, 0.1, 'sine', 0.08, 760); }
+    else if (name === 'correct') { tone(659, 0, 0.14, 'sine', 0.1); tone(880, 0.09, 0.22, 'sine', 0.1); tone(1318, 0.09, 0.18, 'sine', 0.035); }
+    else if (name === 'wrong') { tone(233, 0, 0.16, 'triangle', 0.07); tone(174, 0.1, 0.24, 'triangle', 0.06); }
+    else if (name === 'complete') {
+      [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.24, 'sine', 0.1));
+      tone(1319, 0.46, 0.42, 'sine', 0.09); tone(659, 0.46, 0.42, 'sine', 0.05); tone(784, 0.46, 0.42, 'sine', 0.05);
+    }
+    else if (name === 'open') { tone(392, 0, 0.1, 'sine', 0.06, 523); tone(523, 0.07, 0.14, 'sine', 0.06, 659); }
   } catch (e) {}
 }
+function beep(ok) { sfx(ok ? 'correct' : 'wrong'); }
+// звук по умолчанию включён один раз (дальше — как выставит пользователь)
+if (!state.soundSeen) { state.sound = true; state.soundSeen = true; save(); }
 
 const app = document.getElementById('app');
 const allLessons = COURSE.units.flatMap((u) => u.lessons.map((l) => ({ ...l, unit: u })));
@@ -436,7 +456,9 @@ function startLesson(lessonId) {
     ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
     { kind: 'recap' },
   ];
-  L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false };
+  steps.forEach((st, i) => { st.uid = i; });
+  L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false, pendingRepeat: false };
+  sfx('open');
   try { tg?.BackButton?.show(); tg.BackButton.onClick(exitLesson); } catch (e) {}
   renderLesson();
 }
@@ -455,9 +477,11 @@ function renderLesson() {
       <div class="theory-visual">${(step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || ''}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
-    const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
-    body = `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>
-      <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('idle')}</div>
+    const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz' && !s.isRepeat).length;
+    body = (step.isRepeat
+      ? `<span class="phase-tag recap">${icon('history',16)} Повторим — было с ошибкой</span>`
+      : `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>`)
+      + `<div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('idle')}</div>
         <div class="bubble" style="font-size:17px"><b>${step.q}</b></div></div>
       <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
       <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
@@ -468,19 +492,33 @@ function renderLesson() {
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
   }
   app.innerHTML = `<div class="lesson-shell">
-    <div class="lesson-head"><button class="xclose" id="lx">✕</button>
+    <div class="lesson-head"><button class="xclose" id="lx">✕</button><button class="lback" id="lback" ${L.idx === 0 ? 'disabled' : ''} aria-label="Назад">‹</button>
       <div class="bar lbar"><i style="width:${progress}%;background:linear-gradient(90deg,#58cc02,#8ee000)"></i></div>
       <button class="hearts-live" data-hearts>${icon('heart',19)} ∞</button></div>
     <div class="lesson-body slide-in" style="padding-bottom:120px">${body}</div></div>`;
   document.getElementById('lx').onclick = () => { haptic(); exitLesson(); };
+  const lb = document.getElementById('lback');
+  if (lb) lb.onclick = () => {
+    if (L.idx === 0) return;
+    document.querySelectorAll('.feedback').forEach((e) => e.remove());
+    haptic(); sfx('click');
+    L.idx--; L.checked = false;
+    const prev = L.steps[L.idx];
+    L.selected = prev && prev.kind === 'quiz' ? (prev.savedSelected ?? null) : null;
+    renderLesson();
+  };
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
   const next = document.getElementById('next');
-  if (next) next.onclick = () => { haptic(); advance(); };
+  if (next) next.onclick = () => { haptic(); sfx('pop'); advance(); };
   if (step.kind === 'quiz') {
     const checkBtn = document.getElementById('check');
+    if (L.selected !== null && L.selected !== undefined) {
+      checkBtn.disabled = false;
+      app.querySelectorAll('[data-opt]').forEach((x) => x.classList.toggle('sel', Number(x.dataset.opt) === L.selected));
+    }
     app.querySelectorAll('[data-opt]').forEach((b) => b.onclick = () => {
       if (L.checked) return;
-      L.selected = Number(b.dataset.opt); haptic();
+      L.selected = Number(b.dataset.opt); step.savedSelected = L.selected; haptic(); sfx('click');
       app.querySelectorAll('[data-opt]').forEach((x) => x.classList.toggle('sel', x === b));
       checkBtn.disabled = false;
     });
@@ -492,7 +530,12 @@ function checkAnswer() {
   const step = L.steps[L.idx];
   const ok = L.selected === step.correct;
   L.checked = true;
-  if (ok) { L.correct++; notify('success'); beep(true); } else { notify('error'); haptic('heavy'); beep(false); }
+  if (!step.counted) {
+    step.counted = true;
+    if (ok) L.correct++;
+  }
+  L.pendingRepeat = !ok;
+  if (ok) { notify('success'); beep(true); } else { notify('error'); haptic('heavy'); beep(false); }
   app.querySelectorAll('[data-opt]').forEach((b) => {
     b.disabled = true; const i = Number(b.dataset.opt);
     if (i === step.correct) b.classList.add('right'); else if (i === L.selected) b.classList.add('wrong');
@@ -500,10 +543,19 @@ function checkAnswer() {
   const fb = document.createElement('div');
   fb.className = `feedback ${ok ? 'ok' : 'bad'}`;
   fb.innerHTML = `<div class="fb-mascot" style="animation:pop .45s ease">${mascotSVG(ok ? 'happy' : 'oops')}</div>
-    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${step.explain}</p>
+    <h3>${ok ? 'Верно!' : 'Почти получилось'}</h3><p>${step.explain}${ok ? '' : '<br><b>Вернёмся к этому вопросу в конце урока.</b>'}</p>
     <button class="btn ${ok ? '' : 'red'}" id="fb-next">Дальше</button>`;
   document.body.appendChild(fb);
-  document.getElementById('fb-next').onclick = () => { fb.remove(); haptic(); advance(); };
+  document.getElementById('fb-next').onclick = () => {
+    fb.remove(); haptic(); sfx('pop');
+    if (L.pendingRepeat) {
+      L.pendingRepeat = false;
+      const recapIdx = L.steps.findIndex((x, i2) => x.kind === 'recap' && i2 > L.idx);
+      const copy = { ...step, isRepeat: true, counted: true, savedSelected: null };
+      if (recapIdx === -1) L.steps.push(copy); else L.steps.splice(recapIdx, 0, copy);
+    }
+    advance();
+  };
 }
 function advance() {
   L.idx++;
@@ -533,7 +585,7 @@ function finishLesson() {
     <button class="btn ghost" id="retry" style="margin-top:12px">Пройти ещё раз</button>
   </div></div>`;
   if (firstTime) confetti(perfect ? 80 : 45);
-  notify('success'); checkAchievements();
+  notify('success'); sfx('complete'); checkAchievements();
   document.getElementById('to-path').onclick = () => { haptic(); exitLesson(); };
   document.getElementById('retry').onclick = () => { haptic(); startLesson(lesson.id); };
 }

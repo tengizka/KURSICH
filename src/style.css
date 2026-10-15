@@ -487,3 +487,6 @@ button.is-pressed{filter:brightness(.95)}
 .splash-mascot.curls{width:min(72vw,280px);margin-bottom:-16px}
 .onboard.splash .wordmark{font-size:min(17vw,60px);text-shadow:0 4px 0 rgba(43,105,3,.40);margin-top:0}
 .curls-img{display:block;width:100%;height:auto}
+.lback{font-size:30px;color:#a7b3ba;font-weight:900;width:36px;text-align:center;line-height:1;background:none}
+.lback:disabled{opacity:.25}
+.lback.is-pressed{transform:scale(.85);color:var(--green-d)}
