@@ -96,7 +96,8 @@ function checkAchievements() {
 }
 
 // ── Навигация ───────────────────────────────
-let flow = state.onboarded ? 'app' : 'splash'; // splash → name → tutorial → app
+let flow = 'intro'; // intro (при каждом заходе) → splash → name → tutorial → app
+let introTimer = null;
 let tutIdx = 0;
 let appTab = 'courses'; // courses | profile | ach | settings
 let inPath = false;
@@ -114,6 +115,26 @@ function render() {
 // ── Онбординг ───────────────────────────────
 function renderOnboarding() {
   app.classList.remove('in-lesson');
+  if (flow === 'intro') {
+    const letters = 'курсич'.split('').map((ch, i) => `<span class="intro-letter" style="animation-delay:${0.55 + i * 0.11}s">${ch}</span>`).join('');
+    app.innerHTML = `<div class="intro-screen">
+      <div class="intro-wave w1"></div><div class="intro-wave w2"></div>
+      <div class="intro-content">
+        <div class="intro-mascot">${mascotSVG('happy')}</div>
+        <div class="intro-word">${letters}</div>
+        <div class="intro-made">made tengizka</div>
+      </div>
+    </div>`;
+    if (!introTimer) {
+      introTimer = setTimeout(() => {
+        introTimer = null;
+        flow = state.onboarded ? 'app' : 'splash';
+        if (flow === 'app') appTab = 'courses';
+        render();
+      }, 2800);
+    }
+    return;
+  }
   if (flow === 'splash') {
     app.innerHTML = `<div class="onboard splash">
       <div class="spacer"></div>

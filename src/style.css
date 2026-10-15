@@ -408,3 +408,17 @@ body.dark .node{box-shadow:inset 0 -7px 0 rgba(0,0,0,.25),inset 0 5px 0 rgba(255
 .lesson-shell{display:flex;flex-direction:column;height:100%;width:100%;max-width:480px;margin:0 auto}
 .lesson-head{flex:none;position:relative;top:auto}
 .lesson-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
+
+/* ── Стартовая анимация: волна и название ─────────────────────────── */
+.intro-screen{flex:1;min-height:0;position:relative;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
+.intro-wave{position:absolute;left:-25%;width:150%;height:135%;bottom:0;background:#58cc02;border-radius:42% 46% 0 0/28% 30% 0 0;transform:translateY(102%);animation:waveRise 1.05s cubic-bezier(.6,.05,.3,1) forwards}
+.intro-wave.w2{background:#7ed321;opacity:.55;animation-delay:.14s;border-radius:48% 40% 0 0/34% 26% 0 0}
+@keyframes waveRise{to{transform:translateY(0)}}
+.intro-content{position:relative;z-index:2;text-align:center;padding:20px}
+.intro-mascot{width:104px;margin:0 auto 4px;opacity:0;animation:introPop .55s .45s cubic-bezier(.2,.9,.3,1.4) forwards}
+@keyframes introPop{from{opacity:0;transform:scale(.5) translateY(18px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.intro-word{font-size:62px;font-weight:900;letter-spacing:-2px;line-height:1;color:#fff;text-transform:lowercase}
+.intro-letter{display:inline-block;opacity:0;animation:letterPop .5s cubic-bezier(.2,.9,.3,1.5) forwards}
+@keyframes letterPop{0%{opacity:0;transform:translateY(26px) scale(.6) rotate(-6deg)}70%{opacity:1;transform:translateY(-4px) scale(1.08)}100%{opacity:1;transform:none}}
+.intro-made{margin-top:10px;font-size:14px;font-weight:800;letter-spacing:2.5px;color:#374151;opacity:0;animation:madeFade .6s 1.5s ease forwards;text-transform:lowercase}
+@keyframes madeFade{from{opacity:0;transform:translateY(8px)}to{opacity:.9;transform:none}}
