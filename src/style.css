@@ -474,3 +474,9 @@ button.is-pressed{filter:brightness(.95)}
 .lesson-body .sticky-cta{position:static;flex:none;margin-top:auto;padding-top:12px}
 .lesson-body .theory-visual{width:104px;height:104px;margin:8px auto 2px}
 .lesson-body .recap-item{padding:11px 13px;margin-bottom:9px}
+
+/* Кнопка урока закреплена снизу, иллюстрация — с воздухом над ней */
+.lesson-body .sticky-cta{background:inherit;padding:14px 0 6px;z-index:3}
+.lesson-body .theory-visual{margin-bottom:16px}
+.lesson-body .q-mascot{width:76px}
+.phase-tag{font-size:12.5px;padding:7px 12px}

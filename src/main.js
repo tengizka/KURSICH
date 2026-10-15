@@ -448,22 +448,22 @@ function renderLesson() {
   let body = '';
   if (step.kind === 'theory') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'theory').length;
-    body = `<span class="phase-tag theory">${icon('book',14)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
+    body = `<span class="phase-tag theory">${icon('book',16)} Сначала разберёмся · ${n} из ${L.theoryN}</span>
       <div class="mascot-row"><div class="mwrap">${mascotSVG('idle')}</div>
         <div class="bubble"><b>${step.t}</b><br>${step.b}</div></div>
       <div class="theory-visual">${(step.ci === 1 && CARD2_ART[L.lesson.id]) || LESSON_ART[L.lesson.id] || ''}</div>
       <div class="sticky-cta"><button class="btn" id="next">Понятно</button></div>`;
   } else if (step.kind === 'quiz') {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz').length;
-    body = `<span class="phase-tag">${icon('help',14)} Вопрос ${n} из ${L.totalQ}</span>
-      <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('think')}</div>
+    body = `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>
+      <div class="mascot-row" style="align-items:center"><div class="q-mascot">${mascotSVG('idle')}</div>
         <div class="bubble" style="font-size:17px"><b>${step.q}</b></div></div>
       <div id="opts">${step.options.map((o, i) => `<button class="opt" data-opt="${i}">${o}</button>`).join('')}</div>
       <div class="sticky-cta"><button class="btn" id="check" disabled>Проверить</button></div>`;
   } else { // recap
-    body = `<span class="phase-tag recap">${icon('target',14)} Закрепим</span>
+    body = `<span class="phase-tag recap">${icon('target',16)} Закрепим</span>
       <h2 style="margin-top:14px">Главное из урока</h2>
-      ${L.lesson.cards.map((c, i) => { const short = (c.b.split(/(?<=\.)\s/)[0] || c.b); return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${c.t}</b><p>${short}</p></div></div>`; }).join('')}
+      ${L.lesson.cards.map((c, i) => { const parts = c.b.split(/(?<=\.)\s/).filter(Boolean); const short = parts.length > 1 ? parts[1] : parts[0]; return `<div class="recap-item"><span class="rn">${i + 1}</span><div><b>${c.t}</b><p>${short}</p></div></div>`; }).join('')}
       <div class="sticky-cta"><button class="btn" id="next">Готово</button></div>`;
   }
   app.innerHTML = `<div class="lesson-shell">
