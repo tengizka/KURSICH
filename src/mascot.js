@@ -125,6 +125,11 @@ export function mascotCurlsSVG() {
       </g>
       <path d="M84 49 Q92 43 100 48" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
       <path d="M122 47 Q130 42 137 47" stroke="#57463a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+      <g fill="#17120e"><circle cx="68" cy="90" r="10"/><circle cx="86" cy="94" r="10"/><circle cx="104" cy="95" r="10"/><circle cx="122" cy="95" r="10"/><circle cx="140" cy="94" r="10"/><circle cx="156" cy="90" r="10"/></g>
+      <g stroke="#5a4a3d" stroke-width="2.6" fill="none" stroke-linecap="round">
+        <path d="M62 78a7 7 0 1 1 7 7"/><path d="M88 66a7 7 0 1 1 7 7"/><path d="M112 62a7 7 0 1 1 7 7"/>
+        <path d="M136 66a7 7 0 1 1 7 7"/><path d="M84 84a6 6 0 1 1 6 6"/><path d="M124 84a6 6 0 1 1 6 6"/>
+      </g>
     </g>
   </svg>`;
 }
