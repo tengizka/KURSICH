@@ -271,7 +271,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .hero-cat{background:linear-gradient(135deg,#58cc02,#7ed321);border-color:#46a302;color:#fff;cursor:default}
 .hero-cat p{color:rgba(255,255,255,.92)}
 .financier{position:relative;display:block}
-.fin-tie{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);width:42px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
+.fin-tie{position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:29px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
 .fin-coin{position:absolute;top:2px;right:0;width:30px;height:30px;border-radius:50%;background:#ffc800;border:2px solid #e0a800;color:#8a6100;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:16px;animation:coinSpin 3.2s ease-in-out infinite}
 @keyframes coinSpin{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.12)}}
 .path{overflow:visible}
@@ -599,3 +599,23 @@ body.dark .win-screen{background:linear-gradient(180deg,#15240f,#101708 55%,#0d1
 .win-sub{color:var(--muted);font-weight:700;margin:0 0 16px}
 @keyframes winIn{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:scale(1)}}
 @keyframes winBounce{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-14px) scale(.98,1.03)}55%{transform:translateY(0) scale(1.03,.96)}75%{transform:translateY(-6px) scale(1,1.01)}}
+
+/* ── Ачивка: появление ── */
+.ach-pop{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:420;width:min(430px,92vw);display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,#fff8d6,#eaffea);border:2px solid #ffd94d;border-radius:22px;padding:13px 15px;box-shadow:0 18px 44px rgba(120,80,0,.28);animation:achIn .55s cubic-bezier(.2,1.4,.3,1) both;cursor:pointer}
+body.dark .ach-pop{background:linear-gradient(135deg,#33300f,#17300f)}
+.ach-pop.out{animation:achOut .38s ease both}
+.ach-pop-ic{width:62px;height:62px;flex:none;border-radius:50%;background:radial-gradient(circle at 32% 28%,#ffec85,#ffc800 62%,#eba300);color:#8a6100;display:flex;align-items:center;justify-content:center;animation:achPulse 1.1s ease-in-out infinite;box-shadow:0 6px 16px rgba(235,163,0,.5)}
+.ach-pop-text{flex:1;min-width:0}
+.ach-pop-text span{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.7px;color:#b45309}
+.ach-pop-text b{display:block;font-size:18px;font-weight:900;line-height:1.15}
+.ach-pop-text p{margin:2px 0 0;color:var(--muted);font-weight:700;font-size:12.5px}
+.ach-pop-m{width:54px;flex:none}
+@keyframes achIn{from{opacity:0;transform:translate(-50%,-26px) scale(.9)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes achOut{to{opacity:0;transform:translate(-50%,-18px) scale(.94)}}
+@keyframes achPulse{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.09) rotate(3deg)}}
+/* ── Коллекция: влезает везде ── */
+.outfit-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.outfit{min-width:0;padding:9px 4px 7px}
+.outfit-m{width:52px}
+.outfit-n{font-size:12px}
+.outfit-r{font-size:9.5px}

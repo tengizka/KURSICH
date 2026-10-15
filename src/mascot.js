@@ -73,6 +73,7 @@ export const OUTFITS = {
 
 export function mascotSVG(emotion = 'idle', outfit = 'none') {
   const f = FACES[emotion] || FACES.idle;
+  const noGlasses = ['proud', 'cool'].includes(emotion) || ['traveler', 'hacker'].includes(outfit);
   return `
   <svg class="mascot-svg" viewBox="0 22 220 142" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Курсич">
     <g class="m-head">
@@ -83,12 +84,12 @@ export function mascotSVG(emotion = 'idle', outfit = 'none') {
       <path d="M108 113 Q112 118 108 122" stroke="#e09a5f" stroke-width="2.4" fill="none" stroke-linecap="round"/>
       ${f.eyes}
       ${f.mouth}
-      <g stroke="#221d18" stroke-width="3.4">
+      ${noGlasses ? '' : `<g stroke="#221d18" stroke-width="3.4">
         <circle cx="86" cy="104" r="20.5" fill="#fff" fill-opacity="0.05"/>
         <circle cx="134" cy="104" r="20.5" fill="#fff" fill-opacity="0.05"/>
         <path d="M106.5 100 Q110 96.5 113.5 100" fill="none" stroke-linecap="round"/>
         <path d="M65.5 100 L55 95 M154.5 100 L165 95" stroke-linecap="round"/>
-      </g>
+      </g>`}
       <path d="M73 91 Q80 84 91 85" stroke="#fff" stroke-width="2.8" opacity=".4" fill="none" stroke-linecap="round"/>
       <g class="m-hair">
         <g fill="#17120e">

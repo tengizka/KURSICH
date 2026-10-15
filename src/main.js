@@ -86,8 +86,39 @@ const TERMS = [
   { name: 'Вычет', pat: 'вычет[а-яёь]*', full: 'Возврат части уплаченного налога', text: 'Государство возвращает часть налога за лечение, учёбу, спорт, жильё и инвестиции. Чеки сохраняй!' },
   { name: 'Подушка безопасности', pat: 'подушк[а-яёь]*', full: 'Запас денег на чёрный день', text: 'Выручит, если сломался телефон или пропал доход. Обычно это траты на 3–6 месяцев жизни, лежат на отдельном вкладе.' },
 ];
+const NEW_TERMS = [
+  { name: 'Алгоритм', pat: 'алгоритм[а-яёь]*', cat: 'Технологии и ИИ', full: 'Пошаговый рецепт для машины', text: 'Точный порядок шагов, по которому компьютер решает задачу. Лента соцсетей — тоже алгоритм: он подбирает, что тебе показать.' },
+  { name: 'Нейросеть', pat: 'нейросет[а-яёь]*', cat: 'Технологии и ИИ', full: 'Программа, которая учится на примерах', text: 'Ей показывают миллионы примеров — и она начинает продолжать текст, рисовать и отвечать. Не думает, а предсказывает вероятное.' },
+  { name: 'Промпт', pat: 'промпт[а-яёь]*', cat: 'Технологии и ИИ', full: 'Запрос к нейросети', text: 'Как ты сформулировал задание — такой и результат. Роль, задача, формат и пример в запросе творят чудеса.' },
+  { name: 'ИИ-агент', pat: 'агент[а-яёь]*', cat: 'Технологии и ИИ', full: 'Нейросеть, которая сама делает шаги', text: 'Ему дают цель, а он планирует и выполняет действия программами. Решения и отправки — только после проверки человеком.' },
+  { name: 'Галлюцинация ИИ', pat: 'галлюцинаци[а-яёь]*', cat: 'Технологии и ИИ', full: 'Уверенная выдумка нейросети', text: 'Модель гладко выдумывает несуществующие факты, цитаты и даты. Лечится только проверкой по источникам.' },
+  { name: 'Блокчейн', pat: 'блокчейн[а-яёь]*', cat: 'Технологии и ИИ', full: 'Цепочка записей у тысяч компьютеров', text: 'Общий журнал операций, который хранят все участники сразу. Поэтому записи в криптовалюте нельзя подделать задним числом.' },
+  { name: 'Seed-фраза', pat: 'seed-фраз[а-яёь]*', cat: 'Безопасность', full: 'Главный ключ от криптокошелька', text: '12–24 слова, которые открывают полный доступ к деньгам. Кто знает фразу — владеет кошельком. Никому её не показывают.' },
+  { name: 'Фишинг', pat: 'фишинг[а-яёь]*', cat: 'Безопасность', full: 'Поддельные письма и сайты', text: 'Притворяются банком или сервисом и выманивают пароль или код. Признаки: срочность и ссылка не на официальный адрес.' },
+  { name: 'Скоринг', pat: 'скоринг[а-яёь]*', cat: 'Технологии и ИИ', full: 'Автоматическая оценка надёжности', text: 'Алгоритм банка по данным присваивает балл: дадут ли кредит и под какой процент. Хорошая история платежей балл поднимает.' },
+  { name: 'Ипотека', pat: 'ипотек[а-яёь]*', cat: 'Кредиты и жильё', full: 'Кредит на покупку жилья', text: 'Банк даёт большую часть цены квартиры, ты возвращаешь годами. Пока долг не закрыт, квартира в залоге у банка.' },
+  { name: 'Первоначальный взнос', pat: 'первоначальн[а-яёь]* взнос[а-яёь]*', cat: 'Кредиты и жильё', full: 'Твоя часть цены жилья сразу', text: 'Деньги, которые платишь продавцу из своих при покупке в ипотеку. Больше взнос — меньше кредит и переплата.' },
+  { name: 'Резюме', pat: 'резюме', cat: 'Работа и продажи', full: 'Короткий рассказ о твоём опыте', text: 'Один экран: кто ты, что умеешь и какие результаты уже делал. Рекрутер смотрит на него секунд десять — пиши цифрами.' },
+  { name: 'Рекрутер', pat: 'рекрутер[а-яёь]*', cat: 'Работа и продажи', full: 'Человек, который ищет сотрудников', text: 'Читает резюме пачками и приглашает на собеседования. Его задача — быстро понять, подходишь ли ты на роль.' },
+  { name: 'Оффер', pat: 'оффер[а-яёь]*', cat: 'Работа и продажи', full: 'Конкретное предложение клиенту', text: 'Что, для кого, какой результат и за сколько — одной фразой. «Лендинг для психологов за 7 дней» сильнее, чем «делаю сайты».' },
+  { name: 'Возражение', pat: 'возражени[а-яёь]*', cat: 'Работа и продажи', full: 'Сомнение клиента, а не отказ', text: '«Дорого» обычно значит «не вижу ценности». Возражение лечат вопросом и конкретикой, а не спором.' },
+  { name: 'Переговоры', pat: 'переговор[а-яёь]*', cat: 'Работа и продажи', full: 'Разговор, где ищут решение для обеих сторон', text: 'За позициями прячутся интересы. Договориться о них — значит оставить обе стороны довольными сделкой.' },
+  { name: 'Фриланс', pat: 'фриланс[а-яёь]*', cat: 'Работа и продажи', full: 'Работа проектами на разных заказчиков', text: 'Без одного начальника: сам ищешь заказы, сам отвечаешь за сроки и оплату. Свобода в обмен на самодисциплину.' },
+  { name: 'Маркетплейс', pat: 'маркетплейс[а-яёь]*', cat: 'Работа и продажи', full: 'Большой онлайн-рынок', text: 'Площадка, где продают тысячи продавцов: WB, Ozon и другие. Покупатель выбирает по фото, цене, рейтингу и отзывам.' },
+  { name: 'Юнит-экономика', pat: 'юнит-экономик[а-яёь]*', cat: 'Работа и продажи', full: 'Математика одного товара или заказа', text: 'Цена минус все расходы на единицу: себестоимость, комиссии, логистика, возвраты. Остаток и есть настоящая прибыль.' },
+  { name: 'Монетизация', pat: 'монетизаци[а-яёь]*', cat: 'Работа и продажи', full: 'Превращение внимания в деньги', text: 'Услуги, продукты, реклама и партнёрки. Маленькая лояльная аудитория может зарабатывать больше огромной случайной.' },
+  { name: 'Личный бренд', pat: 'личн[а-яёь]* бренд[а-яёь]*', cat: 'Работа и продажи', full: 'Что о тебе знают и думают люди', text: 'Тема, стиль и репутация в одном. Бренд — это упакованная правда о тебе, а не выдуманный персонаж.' },
+  { name: 'Дофамин', pat: 'дофамин[а-яёь]*', cat: 'Деньги и мозг', full: '«Гормон предвкушения»', text: 'Мозг вспыхивает от ожидания покупки сильнее, чем от самой вещи. Поэтому корзина радует, а полка — уже нет.' },
+  { name: 'Прокрастинация', pat: 'прокрастинаци[а-яёь]*', cat: 'Учёба и творчество', full: 'Привычка откладывать на потом', text: 'Не лень, а защита от страшного и непонятного. Лечится первым шагом на пять минут и убранным телефоном.' },
+  { name: 'Волатильность', pat: 'волатильност[а-яёь]*', cat: 'Инвестиции', full: 'Как сильно прыгает цена', text: 'Криптовалюта волатильна: плюс 30% за неделю и минус 50% за месяц для неё норма. Вклад не волатилен вообще.' },
+  { name: 'Хук', pat: 'хук[а-яёь]*', cat: 'Учёба и творчество', full: 'Крючок в первые секунды видео', text: 'Фраза или кадр, которые обещают пользу и останавливают палец. Без хука видео листают, не досмотрев.' },
+  { name: 'Субтитры', pat: 'субтитр[а-яёь]*', cat: 'Учёба и творчество', full: 'Текст речи прямо на видео', text: 'Половина зрителей смотрит без звука. Субтитры удерживают тех, кто иначе просто пролистал бы.' },
+  { name: 'Силуэт', pat: 'силуэт[а-яёь]*', cat: 'Учёба и творчество', full: 'Очертание предмета одной тенью', text: 'Хороший персонаж или логотип узнаётся по силуэту без деталей. Сначала форма — потом украшения.' },
+  { name: 'Конфликт', pat: 'конфликт[а-яёь]*', cat: 'Учёба и творчество', full: 'Столкновение желания и препятствия', text: 'Двигатель истории и переговоров. Бывает с людьми, обстоятельствами и с самим собой.' },
+];
+TERMS.push(...NEW_TERMS);
 const TERM_MAP = {};
-TERMS.forEach((x) => { TERM_MAP[x.name] = { full: x.full, text: x.text }; });
+TERMS.forEach((x) => { TERM_MAP[x.name] = { full: x.full, text: x.text, cat: x.cat }; });
 const TERM_RE = new RegExp('(^|[^А-Яа-яЁёA-Za-z0-9])(' + TERMS.map((x) => x.pat).join('|') + ')(?![А-Яа-яЁёA-Za-z0-9])', 'gi');
 const TERM_TESTS = TERMS.map((x) => ({ name: x.name, re: new RegExp('^(?:' + x.pat + ')$', 'i') }));
 function termSpan(word) {
@@ -246,12 +277,25 @@ function confetti(n = 60) {
   }
 }
 function checkAchievements() {
-  ACHIEVEMENTS.forEach((a) => {
+  ACHIEVEMENTS.forEach((a, i) => {
     if (!state.seenAch.includes(a.id) && a.check(state)) {
       state.seenAch.push(a.id); save();
-      setTimeout(() => { toast(`Достижение: ${a.title}`); notify('success'); }, 500);
+      setTimeout(() => showAchPop(a), 600 + i * 2400);
     }
   });
+}
+function showAchPop(a) {
+  document.querySelectorAll('.ach-pop').forEach((e) => e.remove());
+  const el = document.createElement('div');
+  el.className = 'ach-pop';
+  el.innerHTML = `<div class="ach-pop-ic">${icon(ACH_ICON[a.id] || 'trophy', 38)}</div>
+    <div class="ach-pop-text"><span>Достижение открыто</span><b>${a.title}</b><p>${a.desc}</p></div>
+    <div class="ach-pop-m">${mascotSVG('celebrate', state.outfit)}</div>`;
+  document.body.appendChild(el);
+  sfx('complete'); notify('success'); haptic('medium'); confetti(26);
+  const kill = () => { el.classList.add('out'); setTimeout(() => el.remove(), 380); };
+  el.onclick = () => { haptic(); kill(); };
+  setTimeout(() => { if (el.isConnected) kill(); }, 3400);
 }
 
 // ── Навигация ───────────────────────────────
@@ -389,22 +433,17 @@ function catalogHtml() {
     const done = courses.reduce((n, x) => n + courseDone(x), 0);
     return { ...c, total, done, nCourses: courses.length };
   });
+  const word = (n) => n % 10 === 1 && n !== 11 ? 'курс' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'курса' : 'курсов';
   return `<div class="screen">
     <div class="bg-decor"><span style="top:70px;right:22px">✦</span><span style="top:210px;left:14px">✦</span><span style="top:430px;right:36px">✦</span></div>
     <div class="greet-row"><div class="gm">${mascotSVG('idle', state.outfit)}</div>
       <div><h2>Привет${state.name ? ', ' + esc(state.name) : ''}!</h2><p>Что учим сегодня?</p></div></div>
-    <div class="topic-head"><h3>Карта мира</h3><span>Листай влево-вправо</span></div>
-    <div class="topic-carousel" id="topic-carousel">
-      ${topics.map((t) => `<button class="topic-card" data-cat="${t.id}">
-        <span class="topic-art">${t.id === 'finance' ? mascotFinancierSVG() : mascotTopicSVG(t.id)}</span>
-        <h3>${t.title}</h3><p>${t.desc}</p>
-        <span class="topic-meta">${t.nCourses} ${t.nCourses % 10 === 1 && t.nCourses !== 11 ? 'курс' : [2, 3, 4].includes(t.nCourses % 10) && ![12, 13, 14].includes(t.nCourses % 100) ? 'курса' : 'курсов'} · ${t.done} из ${t.total} уроков</span>
-        <span class="topic-bar"><i style="width:${t.total ? Math.round((t.done / t.total) * 100) : 0}%"></i></span>
-        <span class="topic-go">Выбрать ›</span>
-      </button>`).join('')}
-    </div>
-    <div class="topic-dots" id="topic-dots">${topics.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div>
-    <p class="topic-hint">В каждой теме — свои курсы, уроки и статьи. Пройденное не теряется: прогресс общий.</p>
+    ${topics.map((t) => `<button class="cat-card" data-cat="${t.id}">
+      <div class="cat-art">${t.id === 'finance' ? mascotFinancierSVG() : mascotTopicSVG(t.id)}</div>
+      <div class="cat-text"><h3>${t.title}</h3><p>${t.desc}</p>
+      <span class="pill cat-pill">${t.nCourses} ${word(t.nCourses)} · ${t.done} из ${t.total} уроков</span></div>
+      <div class="cat-chev">›</div>
+    </button>`).join('')}
   </div>`;
 }
 const COURSE_SUB = {
@@ -525,7 +564,7 @@ function profileHtml() {
       ${tgPhoto ? `<img class="tg-avatar" src="${esc(tgPhoto)}" alt="">` : `<div class="tg-initial">${esc((state.name || 'К')[0].toUpperCase())}</div>`}
       <div><div style="font-size:19px;font-weight:900">${esc(state.name) || 'Ученик'}</div>
       <div style="font-weight:800;color:var(--muted);font-size:13px;margin-top:3px">Уровень ${level()} · ${state.xp} XP</div>
-      <div style="font-weight:800;color:var(--muted);font-size:13px">Уроков пройдено: ${doneCount()} из ${totalLessons}</div></div>
+      <div style="font-weight:800;color:var(--muted);font-size:13px">Уроков пройдено: ${doneCount()} из ${allLessons.length}</div></div>
     </div>
     <div class="cardbox" style="padding:4px 16px">
       <button class="menu-row" id="go-dict"><span class="mi" style="background:#ddf4ff;color:#1899d6">${icon('book',22)}</span>Словарь терминов<span style="margin-left:auto;font-weight:900;color:var(--muted);font-size:13px">если забыл слово</span><span class="chev">›</span></button>
@@ -572,20 +611,30 @@ function settingsHtml() {
   </div>`;
 }
 
+const TERM_CAT = {
+  'Инфляция': 'Деньги и банки', 'Ключевая ставка': 'Деньги и банки', 'Вклад': 'Деньги и банки', 'Бюджет': 'Деньги и банки', 'Подушка безопасности': 'Деньги и банки', 'Кэшбэк': 'Деньги и банки', 'Цифровой рубль': 'Деньги и банки', 'Лицензия': 'Деньги и банки', 'Комиссия': 'Деньги и банки',
+  'Диверсификация': 'Инвестиции', 'Сложный процент': 'Инвестиции', 'Облигация': 'Инвестиции', 'Акция': 'Инвестиции', 'Брокер': 'Инвестиции', 'Доходность': 'Инвестиции', 'Просадка': 'Инвестиции', 'Котировки': 'Инвестиции', 'Эмитент': 'Инвестиции', 'Купоны': 'Инвестиции', 'Номинал': 'Инвестиции', 'Портфель': 'Инвестиции', 'Актив': 'Инвестиции', 'Горизонт': 'Инвестиции', 'Кредитное плечо': 'Инвестиции', 'Финансовая пирамида': 'Инвестиции', 'Криптовалюта': 'Инвестиции', 'Майнинг': 'Инвестиции',
+  'Кредитная история': 'Кредиты и жильё', 'Рефинансирование': 'Кредиты и жильё', 'Самозапрет': 'Кредиты и жильё', 'Период охлаждения': 'Кредиты и жильё', 'Грейс-период': 'Кредиты и жильё',
+  'Налоговый вычет': 'Налоги', 'Вычет': 'Налоги', 'Софинансирование': 'Налоги',
+  'Дипфейк': 'Безопасность', 'Квишинг': 'Безопасность',
+};
+const DICT_ORDER = ['Сокращения', 'Деньги и банки', 'Инвестиции', 'Кредиты и жильё', 'Налоги', 'Работа и продажи', 'Технологии и ИИ', 'Безопасность', 'Деньги и мозг', 'Учёба и творчество', 'Общее'];
 function dictHtml() {
   const items = [
-    ...Object.entries(GLOSSARY).filter(([k]) => k !== 'QR').map(([name, g]) => ({ name, full: g.full, text: g.text })),
-    ...Object.entries(TERM_MAP).map(([name, g]) => ({ name, full: g.full, text: g.text })),
+    ...Object.entries(GLOSSARY).filter(([k]) => k !== 'QR').map(([name, g]) => ({ name, full: g.full, text: g.text, cat: 'Сокращения' })),
+    ...Object.entries(TERM_MAP).map(([name, g]) => ({ name, full: g.full, text: g.text, cat: g.cat || TERM_CAT[name] || 'Общее' })),
   ].sort((x, y) => x.name.localeCompare(y.name, 'ru'));
+  const secs = DICT_ORDER.map((cat) => ({ cat, items: items.filter((i) => i.cat === cat) })).filter((g) => g.items.length);
   return `<div class="screen">
     <button class="menu-row" data-back-profile style="border:0;padding:10px 0 0"><span style="font-size:20px">‹</span> Профиль</button>
     <h2 class="st">Словарь</h2>
-    <p class="sub" style="margin-top:-6px">Забыл слово из урока — найди его здесь. В самих уроках слова подчёркиваются только при первой встрече.</p>
+    <p class="sub" style="margin-top:-6px">Забыл слово из урока — найди его здесь, по категориям. В самих уроках слова подчёркиваются только при первой встрече.</p>
     <input class="name-input dict-search" id="dict-search" type="text" placeholder="Найти слово…" autocomplete="off">
-    <div class="cardbox" style="padding:4px 16px;margin-top:14px">
-      ${items.map((it) => `<div class="dict-item" data-s="${(it.name + ' ' + it.full + ' ' + it.text).toLowerCase()}"><div class="dict-term">${it.name}</div><div class="dict-full">${it.full}</div><p>${it.text}</p></div>`).join('')}
-      <div class="dict-item" id="dict-empty" style="display:none;text-align:center;color:var(--muted);font-weight:800">Такого слова пока нет 🤔</div>
-    </div></div>`;
+    ${secs.map((g) => `<section class="dict-sec"><h3 class="subhead">${g.cat}</h3><div class="cardbox" style="padding:4px 16px">
+      ${g.items.map((it) => `<div class="dict-item" data-s="${(it.name + ' ' + it.full + ' ' + it.text).toLowerCase()}"><div class="dict-term">${it.name}</div><div class="dict-full">${it.full}</div><p>${it.text}</p></div>`).join('')}
+    </div></section>`).join('')}
+    <div class="dict-item" id="dict-empty" style="display:none;text-align:center;color:var(--muted);font-weight:800;padding:14px">Такого слова пока нет</div>
+  </div>`;
 }
 
 function bindApp() {
@@ -628,6 +677,7 @@ function bindApp() {
   if (ds) ds.addEventListener('input', () => {
     const v = ds.value.trim().toLowerCase(); let any = false;
     app.querySelectorAll('.dict-item[data-s]').forEach((it) => { const show = !v || it.dataset.s.includes(v); it.style.display = show ? '' : 'none'; if (show) any = true; });
+    app.querySelectorAll('.dict-sec').forEach((sec) => { sec.style.display = [...sec.querySelectorAll('.dict-item')].some((it) => it.style.display !== 'none') ? '' : 'none'; });
     const e = document.getElementById('dict-empty'); if (e) e.style.display = any ? 'none' : '';
   });
   app.querySelectorAll('[data-back-profile]').forEach((b) => b.onclick = () => { appTab = 'profile'; haptic(); renderApp(); resetScroll(); });

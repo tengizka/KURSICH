@@ -354,6 +354,15 @@ export const ACHIEVEMENTS = [
   { id: 'ninja', emoji: '🥷', title: 'Финансовый ниндзя', desc: 'Сдать финальный экзамен', check: (s) => !!s.completed['u6l4'] },
   { id: 'grad', emoji: '🎓', title: 'Выпускник КУРСИЧА', desc: 'Пройти весь курс финграмотности', check: (s) => Object.keys(s.completed).length >= 24 },
   { id: 'streak3', emoji: '⚡', title: 'Серия x3', desc: 'Заходить 3 дня подряд', check: (s) => (s.bestStreak || 0) >= 3 },
+  { id: 'ten', emoji: '🏅', title: 'Десятка', desc: 'Пройти 10 уроков', check: (s) => Object.keys(s.completed).length >= 10 },
+  { id: 'perfect3', emoji: '🎯', title: 'Снайпер', desc: 'Пройти 3 урока на 100%', check: (s) => Object.values(s.completed).filter((v) => v >= 1).length >= 3 },
+  { id: 'week', emoji: '📅', title: 'Неделя силы', desc: 'Заходить 7 дней подряд', check: (s) => (s.bestStreak || 0) >= 7 },
+  { id: 'xp500', emoji: '💎', title: 'Полтысячи', desc: 'Набрать 500 XP', check: (s) => s.xp >= 500 },
+  { id: 'fifty', emoji: '🚀', title: 'Полсотни', desc: 'Пройти 50 уроков', check: (s) => Object.keys(s.completed).length >= 50 },
+  { id: 'perfect10', emoji: '🏆', title: 'Идеальная десятка', desc: 'Пройти 10 уроков на 100%', check: (s) => Object.values(s.completed).filter((v) => v >= 1).length >= 10 },
+  { id: 'xp1500', emoji: '👑', title: 'Полторы тысячи', desc: 'Набрать 1 500 XP', check: (s) => s.xp >= 1500 },
+  { id: 'hundred', emoji: '🌟', title: 'Сотня', desc: 'Пройти 100 уроков', check: (s) => Object.keys(s.completed).length >= 100 },
+  { id: 'all120', emoji: '🎓', title: 'Покоритель карты', desc: 'Пройти все 120 уроков КУРСИЧА', check: (s) => Object.keys(s.completed).length >= 120 },
 ];
 
 export const totalLessons = COURSE.units.reduce((n, u) => n + u.lessons.length, 0);

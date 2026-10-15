@@ -11,6 +11,8 @@ const P = {
   book: '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',
   trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/>',
+  rocket: '<path d="M12 2.5c2.8 1.8 4.5 5 4.5 8.5l-4.5 4.5L7.5 11C7.5 7.5 9.2 4.3 12 2.5z"/><circle cx="12" cy="9" r="1.8"/><path d="M7.5 11 4 14l3.5.5M16.5 11 20 14l-3.5.5M10.5 15.5 12 21l1.5-5.5"/>',
+  crown: '<path d="M3 18h18M4 17l-1-9 5.5 4L12 5l3.5 7L21 8l-1 9z"/>',
   sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/><path d="M1.5 14h5M9.5 8h5M17.5 16h5"/>',
   moon: '<path d="M12 3a6.36 6.36 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
@@ -75,4 +77,4 @@ export const LESSON_ICON = {
 };
 export const UNIT_ICON = { u1: 'compass', u2: 'landmark', u3: 'lifebuoy', u4: 'sprout', u5: 'calculator', u6: 'shield' };
 export const COURSE_ICON = { 'finlit-2026': 'wallet', 'invest-pro': 'trending', 'career': 'briefcase', 'flat': 'home', 'crypto': 'coins', 'business': 'bulb' };
-export const ACH_ICON = { first: 'star', five: 'flag', perfect: 'gem', rich: 'wallet', half: 'flag', ninja: 'zap', grad: 'grad', streak3: 'zap' };
+export const ACH_ICON = { first: 'star', five: 'flag', perfect: 'gem', rich: 'wallet', half: 'flag', ninja: 'zap', grad: 'grad', streak3: 'zap', ten: 'target', perfect3: 'target', week: 'calendar', xp500: 'gem', fifty: 'rocket', perfect10: 'trophy', xp1500: 'crown', hundred: 'star', all120: 'grad' };
