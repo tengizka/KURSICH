@@ -23,6 +23,19 @@ try { tg?.exitFullscreen?.(); } catch (e) {}
 const tgUser = tg?.initDataUnsafe?.user || null;
 const tgName = tgUser?.first_name || '';
 const tgPhoto = tgUser?.photo_url || '';
+// Видимое нажатие: класс ставится в момент касания, до срабатывания click
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  b.classList.add('is-pressed');
+  setTimeout(() => b.classList.remove('is-pressed'), 240);
+}, { passive: true });
+['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) =>
+  document.addEventListener(ev, (e) => {
+    const b = e.target.closest && e.target.closest('button');
+    if (b) setTimeout(() => b.classList.remove('is-pressed'), 90);
+  }, { passive: true }));
+
 const haptic = (t = 'light') => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (e) {} };
 const notify = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (e) {} };
 
