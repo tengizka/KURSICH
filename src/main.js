@@ -2,6 +2,7 @@ import './style.css';
 import { COURSE, OTHER_COURSES, ACHIEVEMENTS, totalLessons } from './course.js';
 import { EXTRA_COURSES } from './courses2.js';
 import { EXTRA_COURSES_2 } from './courses3.js';
+import { EXTRA_COURSES_3 } from './courses4.js';
 import { mascotSVG, mascotFinancierSVG, mascotCurlsSVG, mascotTopicSVG } from './mascot.js';
 import { UNIT_ART, CAT_ART, LESSON_ART, COURSE_ART, CARD2_ART, GRACE_ART } from './illustrations.js';
 import { icon, LESSON_ICON, UNIT_ICON, COURSE_ICON, ACH_ICON } from './icons.js';
@@ -87,10 +88,21 @@ const TERMS = [
   { name: 'Подушка безопасности', pat: 'подушк[а-яёь]*', full: 'Запас денег на чёрный день', text: 'Выручит, если сломался телефон или пропал доход. Обычно это траты на 3–6 месяцев жизни, лежат на отдельном вкладе.' },
 ];
 const NEW_TERMS = [
+  { name: 'Агент по недвижимости', pat: 'агент[а-яёь]* по недвижимости', cat: 'Недвижимость', full: 'Специалист, который ведёт сделку с жильём', text: 'Помогает купить или продать квартиру: цена, клиенты, переговоры, документы и расчёты. Зарабатывает комиссию от сделки.' },
+  { name: 'Риелтор', pat: 'риелтор[а-яёь]*', cat: 'Недвижимость', full: 'То же, что агент по недвижимости', text: 'Разговорное название профессии. В России деятельность риелторов не лицензируется, поэтому имя и отзывы агента — главная гарантия.' },
+  { name: 'ЕГРН', pat: 'ЕГРН', cat: 'Недвижимость', full: 'Единый государственный реестр недвижимости', text: 'База, где записано, кому принадлежит квартира и нет ли на ней залога или ареста. Выписка из ЕГРН — главный документ проверки.' },
+  { name: 'Росреестр', pat: 'Росреестр[а-яёь]*', cat: 'Недвижимость', full: 'Служба, которая регистрирует права на жильё', text: 'Именно запись Росреестра делает покупателя собственником. Договор без регистрации — ещё не квартира.' },
+  { name: 'ДДУ', pat: 'ДДУ', cat: 'Недвижимость', full: 'Договор долевого участия', text: 'Договор с застройщиком при покупке квартиры в строящемся доме. Деньги при этом лежат на эскроу-счёте до сдачи дома.' },
+  { name: 'Задаток', pat: 'задат[а-яёь]*', cat: 'Недвижимость', full: 'Деньги-якорь сделки', text: 'Покупатель передумал — задаток остался у продавца. Продавец передумал — возвращает в двойном размере. Отличается от аванса, который просто возвращают.' },
+  { name: 'Аккредитив', pat: 'аккредитив[а-яёь]*', cat: 'Недвижимость', full: 'Безопасный расчёт через банк', text: 'Деньги покупателя лежат на счёте в банке и уходят продавцу только после регистрации сделки. Не прошла регистрация — деньги вернулись.' },
+  { name: 'Эскроу-счёт', pat: 'эскроу[а-яёь-]*', cat: 'Недвижимость', full: 'Счёт-хранилище для денег сделки', text: 'Банк держит деньги, пока не выполнится условие: дом сдан или сделка зарегистрирована. Застройщик банкрот — деньги возвращаются покупателю.' },
+  { name: 'Обременение', pat: 'обременени[а-яёь]*', cat: 'Недвижимость', full: 'Ограничение на квартиру', text: 'Ипотека банка, арест, рента и подобное. С обременением квартиру нельзя просто продать — сначала разбираются с ограничением.' },
+  { name: 'Предварительный договор', pat: 'предварительн[а-яёь]* договор[а-яёь]*', cat: 'Недвижимость', full: 'Репетиция главной сделки', text: 'Фиксирует, кто что покупает, за сколько, к какому сроку и с каким задатком. Пишется до основного договора купли-продажи.' },
+  { name: 'Материнский капитал', pat: 'материнск[а-яёь]* капитал[а-яёь]*', cat: 'Недвижимость', full: 'Господдержка семьям с детьми', text: 'Его часто вкладывают в жильё. Если квартира куплена с маткапиталом, детям обязаны выделить доли — агент проверяет это до сделки.' },
   { name: 'Алгоритм', pat: 'алгоритм[а-яёь]*', cat: 'Технологии и ИИ', full: 'Пошаговый рецепт для машины', text: 'Точный порядок шагов, по которому компьютер решает задачу. Лента соцсетей — тоже алгоритм: он подбирает, что тебе показать.' },
   { name: 'Нейросеть', pat: 'нейросет[а-яёь]*', cat: 'Технологии и ИИ', full: 'Программа, которая учится на примерах', text: 'Ей показывают миллионы примеров — и она начинает продолжать текст, рисовать и отвечать. Не думает, а предсказывает вероятное.' },
   { name: 'Промпт', pat: 'промпт[а-яёь]*', cat: 'Технологии и ИИ', full: 'Запрос к нейросети', text: 'Как ты сформулировал задание — такой и результат. Роль, задача, формат и пример в запросе творят чудеса.' },
-  { name: 'ИИ-агент', pat: 'агент[а-яёь]*', cat: 'Технологии и ИИ', full: 'Нейросеть, которая сама делает шаги', text: 'Ему дают цель, а он планирует и выполняет действия программами. Решения и отправки — только после проверки человеком.' },
+  { name: 'ИИ-агент', pat: 'ии-агент[а-яёь]*', cat: 'Технологии и ИИ', full: 'Нейросеть, которая сама делает шаги', text: 'Ему дают цель, а он планирует и выполняет действия программами. Решения и отправки — только после проверки человеком.' },
   { name: 'Галлюцинация ИИ', pat: 'галлюцинаци[а-яёь]*', cat: 'Технологии и ИИ', full: 'Уверенная выдумка нейросети', text: 'Модель гладко выдумывает несуществующие факты, цитаты и даты. Лечится только проверкой по источникам.' },
   { name: 'Блокчейн', pat: 'блокчейн[а-яёь]*', cat: 'Технологии и ИИ', full: 'Цепочка записей у тысяч компьютеров', text: 'Общий журнал операций, который хранят все участники сразу. Поэтому записи в криптовалюте нельзя подделать задним числом.' },
   { name: 'Seed-фраза', pat: 'seed-фраз[а-яёь]*', cat: 'Безопасность', full: 'Главный ключ от криптокошелька', text: '12–24 слова, которые открывают полный доступ к деньгам. Кто знает фразу — владеет кошельком. Никому её не показывают.' },
@@ -250,7 +262,7 @@ function beep(ok) { sfx(ok ? 'correct' : 'wrong'); }
 if (!state.soundSeen) { state.sound = true; state.soundSeen = true; save(); }
 
 const app = document.getElementById('app');
-const ALL_COURSES = [{ ...COURSE, cat: 'finance' }, ...EXTRA_COURSES, ...EXTRA_COURSES_2];
+const ALL_COURSES = [{ ...COURSE, cat: 'finance' }, ...EXTRA_COURSES, ...EXTRA_COURSES_2, ...EXTRA_COURSES_3];
 const allLessons = ALL_COURSES.flatMap((co) => co.units.flatMap((u) => u.lessons.map((l) => ({ ...l, unit: u, course: co }))));
 const courseLessons = (co) => co.units.flatMap((u) => u.lessons);
 const courseDone = (co) => courseLessons(co).filter((l) => state.completed[l.id]).length;
@@ -449,7 +461,7 @@ function catalogHtml() {
 const COURSE_SUB = {
   'finlit-2026': 'Основы', invest: 'Рост денег', crypto: 'Рост денег', flat: 'Жильё и мышление', psymoney: 'Жильё и мышление',
   sales: 'Продажи и бизнес', business: 'Продажи и бизнес', market: 'Продажи и бизнес', marketing: 'Продажи и бизнес',
-  brand: 'Карьера и развитие', career: 'Карьера и развитие', freelance: 'Карьера и развитие', talks: 'Карьера и развитие', learn: 'Карьера и развитие',
+  brand: 'Карьера и развитие', career: 'Карьера и развитие', freelance: 'Карьера и развитие', talks: 'Карьера и развитие', learn: 'Карьера и развитие', realty: 'Недвижимость',
   ai: 'ИИ и алгоритмы', ai2: 'ИИ и алгоритмы', algo: 'ИИ и алгоритмы', code: 'Код и безопасность', cyber: 'Код и безопасность',
   eng: 'Старт и практика', engt: 'Старт и практика', draw: 'Рисунок', design: 'Дизайн и видео', video: 'Дизайн и видео', story: 'Истории',
 };
@@ -534,7 +546,10 @@ function pathHtml(course) {
     <p class="sub">${dc} из ${flat.length} уроков · уровень ${level()}</p>
     <div class="bar" style="margin:0 2px 8px"><i style="width:${Math.max(3, (dc / flat.length) * 100)}%"></i></div>
     ${units}
-    <button class="train-card" data-training="${course.id}"><span class="train-ic">${icon('zap',26)}</span><span class="train-text"><b>Тренировка</b><p>Случайные вопросы из этого курса вперемешку. Повторяй, когда захочешь закрепить.</p></span><span class="chev">›</span></button></div>`;
+    <div class="path train-path"><div class="node-wrap" style="transform:translateX(0)">
+      <button class="node train-node ${dc === 0 ? 'locked' : ''}" data-training="${course.id}" ${dc === 0 ? 'disabled' : ''} aria-label="Повторение">${state.completed['train-' + course.id] ? icon('check',30) : icon('history',28)}</button>
+      <div class="node-label ${dc === 0 ? 'locked' : ''}">Повторение</div>
+      <div class="mini-progress">${dc === 0 ? 'пройди первый урок' : 'микс вопросов курса · +5 XP'}</div></div></div></div>`;
 }
 
 // ── Профиль / достижения / настройки ───────────────────────────────
@@ -619,7 +634,7 @@ const TERM_CAT = {
   'Налоговый вычет': 'Налоги', 'Вычет': 'Налоги', 'Софинансирование': 'Налоги',
   'Дипфейк': 'Безопасность', 'Квишинг': 'Безопасность',
 };
-const DICT_ORDER = ['Сокращения', 'Деньги и банки', 'Инвестиции', 'Кредиты и жильё', 'Налоги', 'Работа и продажи', 'Технологии и ИИ', 'Безопасность', 'Деньги и мозг', 'Учёба и творчество', 'Общее'];
+const DICT_ORDER = ['Сокращения', 'Деньги и банки', 'Инвестиции', 'Кредиты и жильё', 'Недвижимость', 'Налоги', 'Работа и продажи', 'Технологии и ИИ', 'Безопасность', 'Деньги и мозг', 'Учёба и творчество', 'Общее'];
 function dictHtml() {
   const items = [
     ...Object.entries(GLOSSARY).filter(([k]) => k !== 'QR').map(([name, g]) => ({ name, full: g.full, text: g.text, cat: 'Сокращения' })),
@@ -703,6 +718,7 @@ function bindApp() {
 
 // ── Урок: теория → вопросы → закрепление ───────────────────────────────
 let L = null;
+let eggN = 0;
 function startLesson(lessonId) {
   const lesson = allLessons.find((l) => l.id === lessonId);
   if (!lesson) return;
@@ -712,6 +728,7 @@ function startTraining(courseId) {
   const course = ALL_COURSES.find((c) => c.id === courseId);
   if (!course) return;
   const pool = courseLessons(course).flatMap((l) => l.quiz).filter((q) => ['single', 'bool', 'dialog', 'case'].includes(q.type));
+  if (!pool.length) { toast('Сначала пройди хотя бы один урок этого курса'); return; }
   const picked = [...pool].sort(() => Math.random() - 0.5).slice(0, 6);
   initLesson({ id: 'train-' + course.id, title: 'Тренировка', xp: 5, cards: [], quiz: picked, course, training: true });
 }
@@ -720,12 +737,8 @@ function initLesson(lesson) {
     ...lesson.cards.map((c, ci) => ({ kind: 'theory', ci, ...c })),
     ...lesson.quiz.map((q) => ({ kind: 'quiz', ...q })),
   ];
-  const pool = lesson.training ? [] : allLessons.filter((x) => x.id !== lesson.id && lesson.course && x.course && x.course.id === lesson.course.id && state.completed[x.id]).flatMap((x) => x.quiz.filter((q) => q.type === 'single' || q.type === 'bool'));
-  if (pool.length) {
-    const mq = pool[Math.floor(Date.now() / 1000) % pool.length];
-    steps.splice(steps.length - 1, 0, { kind: 'quiz', ...mq, isMix: true, counted: true });
-  }
   steps.forEach((st, i) => { st.uid = i; });
+  eggN = 0;
   L = { lesson, steps, idx: 0, correct: 0, totalQ: lesson.quiz.length, theoryN: lesson.cards.length, selected: null, checked: false, pendingRepeat: false, streak: 0 };
   curCourse = lesson.course || curCourse;
   lessonSeen = new Set();
@@ -753,9 +766,7 @@ function renderLesson() {
     const n = L.steps.slice(0, L.idx + 1).filter((s) => s.kind === 'quiz' && !s.isRepeat).length;
     const tag = step.isRepeat
       ? `<span class="phase-tag recap">${icon('history',16)} Повторим — было с ошибкой</span>`
-      : step.isMix
-        ? `<span class="phase-tag recap">${icon('history',16)} Микс-повторение · из пройденного</span>`
-        : `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>`;
+      : `<span class="phase-tag">${icon('help',16)} Вопрос ${n} из ${L.totalQ}</span>`;
     let inner = '';
     if (step.type === 'dialog') {
       inner = `<div class="chat">${step.chat.map((m) => `<div class="chat-row"><div class="chat-name">${m.n}</div><div class="chat-bubble">${m.t}</div></div>`).join('')}</div>
@@ -798,6 +809,11 @@ function renderLesson() {
     renderLesson();
   };
   app.querySelectorAll('[data-hearts]').forEach((b) => b.onclick = () => { haptic(); showHeartsModal(); });
+  const mw = app.querySelector('.mwrap');
+  if (mw && L && L.lesson.id === 're1') {
+    mw.style.cursor = 'pointer';
+    mw.onclick = () => { eggN++; haptic(); if (eggN >= 5) { eggN = 0; sfx('complete'); confetti(48); toast('Пасхалка найдена! Никита, Курсич официально заявляет: первая проданная квартира будет твоей. Вперёд, агент Никита!'); } };
+  }
   const next = document.getElementById('next');
   if (next) next.onclick = () => { haptic(); sfx('pop'); advance(); };
   if (step.kind === 'quiz') {

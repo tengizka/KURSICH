@@ -638,3 +638,8 @@ body.dark .train-card{background:linear-gradient(135deg,#2b270e,#14240f)}
 .train-ic{width:52px;height:52px;flex:none;border-radius:50%;background:radial-gradient(circle at 32% 28%,#ffec85,#ffc800 65%,#eba300);color:#8a6100;display:flex;align-items:center;justify-content:center}
 .train-text{flex:1}.train-text b{font-size:17px;font-weight:900}
 .train-text p{margin:2px 0 0;color:var(--muted);font-weight:700;font-size:13px;line-height:1.4}
+
+/* ── Финальный узел «Повторение» на тропинке ── */
+.train-path{display:flex;justify-content:center;padding:10px 0 18px}
+.train-node{background:linear-gradient(180deg,#ffe066,#ffc800)!important;color:#8a6100;--nd:#e0a800;animation:nodePulse 1.6s ease-in-out infinite}
+.train-node.locked{animation:none;background:#e5e7eb!important;color:#a7b3ba;--nd:#cfd6da}
