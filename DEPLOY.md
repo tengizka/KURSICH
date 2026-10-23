@@ -6,7 +6,7 @@
 push в GitHub ──► GitHub Actions (deploy-pages.yml) ──► сборка Vite (dist/)
                                                               │
                                                               ▼
-                                          GitHub Pages: https://tengizka.github.io/KURSICH/
+                                          GitHub Pages: https://tengizka.fun/kursich/
                                                               │
                                                               ▼
                                           этот URL указан в BotFather как Web App
@@ -19,11 +19,11 @@ push в GitHub ──► GitHub Actions (deploy-pages.yml) ──► сборк�
 
 ## Адрес сайта
 
-**https://tengizka.github.io/KURSICH/**
+**https://tengizka.fun/kursich/**
 
 ## Если деплой не пошёл (один раз, вручную)
 
-1. Открой репозиторий: https://github.com/tengizka/KURSICH
+1. Открой репозиторий: https://github.com/tengizka/kursich
 2. **Settings → Pages**
 3. В блоке **Build and deployment → Source** выбери **GitHub Actions**
    (не «Deploy from a branch»!)
@@ -34,7 +34,7 @@ push в GitHub ──► GitHub Actions (deploy-pages.yml) ──► сборк�
 
 1. В Telegram напиши [@BotFather](https://t.me/BotFather) → `/newbot` → задай имя («КУРСИЧ») и username бота
 2. `/setmenubutton` → выбери своего бота
-3. Отправь URL: `https://tengizka.github.io/KURSICH/`
+3. Отправь URL: `https://tengizka.fun/kursich/`
 4. Отправь текст кнопки: `🎓 Учиться`
 5. Открой бота → кнопка меню слева от поля ввода откроет мини-апп
 

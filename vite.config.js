@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-// На GitHub Pages сайт лежит по адресу tengizka.github.io/KURSICH/ (подпапка),
+// На GitHub Pages сайт лежит по адресу tengizka.fun/kursich/ (подпапка),
 // поэтому для production-сборки используем относительный base './' —
 // так ассеты подгрузятся и с GitHub Pages, и с любого другого хостинга.
 // В dev-режиме остаётся '/' для локальной разработки и превью.

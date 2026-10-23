@@ -34,7 +34,7 @@ npm run build    # production в dist/
 
 Сайт автоматически собирается и публикуется через **GitHub Actions** при каждом пуше в ветку `arena/b3bf7743-kursich` (и `main`):
 
-**👉 Живой адрес: https://tengizka.github.io/KURSICH/**
+**👉 Живой адрес: https://tengizka.fun/kursich/**
 
 - Workflow: [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) — `npm ci` → `npm run build` → deploy `dist/` на Pages
 - В настройках репозитория должно быть: **Settings → Pages → Build and deployment → Source: GitHub Actions**
@@ -43,9 +43,9 @@ npm run build    # production в dist/
 
 ## Как подключить к Telegram
 
-1. Дождись зелёного деплоя во вкладке **Actions** (сайт: https://tengizka.github.io/KURSICH/).
+1. Дождись зелёного деплоя во вкладке **Actions** (сайт: https://tengizka.fun/kursich/).
 2. В [@BotFather](https://t.me/BotFather): `/newbot` → имя бота, например «КУРСИЧ».
-3. Там же: `/setmenubutton` → выбери бота → отправь URL `https://tengizka.github.io/KURSICH/` → текст кнопки, например «🎓 Учиться».
+3. Там же: `/setmenubutton` → выбери бота → отправь URL `https://tengizka.fun/kursich/` → текст кнопки, например «🎓 Учиться».
 4. Открой бота и нажми кнопку меню — мини-апп подхватит тему и пользователя Telegram, внутри будет работать тактильная отдача.
 
 > ⚠️ Образовательный проект, не персональная финансовая рекомендация. Цифры проверяй на cbr.ru / ФНС / Госуслугах.

@@ -1,7 +1,7 @@
 name: 🚀 Deploy КУРСИЧ to GitHub Pages
 
 # Сайт автоматически пересобирается и публикуется при каждом пуше.
-# Итоговый адрес мини-аппа: https://tengizka.github.io/KURSICH/
+# Итоговый адрес мини-аппа: https://tengizka.fun/kursich/
 on:
   push:
     branches:
